@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.Double?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.shape.Polygon?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0"
+            prefWidth="1200.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.catan.BoardController">
+    <children>
+        <!-- TileRow 1: 3 Tiles -->
+        <Polygon fx:id="TileRow1_1" layoutX="250" layoutY="50" stroke="BLACK" strokeWidth="2">
+            <points>
+                <Double fx:value="50"/>
+                <Double fx:value="0"/>
+                <Double fx:value="100"/>
+                <Double fx:value="25"/>
+                <Double fx:value="100"/>
+                <Double fx:value="75"/>
+                <Double fx:value="50"/>
+                <Double fx:value="100"/>
+                <Double fx:value="0"/>
+                <Double fx:value="75"/>
+                <Double fx:value="0"/>
+                <Double fx:value="25"/>
+            </points>
+        </Polygon>
+        <Polygon fx:id="TileRow1_2" layoutX="350" layoutY="50" stroke="BLACK" strokeWidth="2">
+            <points>
+                <Double fx:value="50"/>
+                <Double fx:value="0"/>
+                <Double fx:value="100"/>
+                <Double fx:value="25"/>
+                <Double fx:value="100"/>
+                <Double fx:value="75"/>
+                <Double fx:value="50"/>
+                <Double fx:value="100"/>
+                <Double fx:value="0"/>
+                <Double fx:value="75"/>
+                <Double fx:value="0"/>
+                <Double fx:value="25"/>
+            </points>
+        </Polygon>
+        <Polygon fx:id="TileRow1_3" layoutX="450" layoutY="50" stroke="BLACK" strokeWidth="2">
+            <points>
+                <Double fx:value="50"/>
+                <Double fx:value="0"/>
+                <Double fx:value="100"/>
+                <Double fx:value="25"/>
+                <Double fx:value="100"/>
+                <Double fx:value="75"/>
+                <Double fx:value="50"/>
+                <Double fx:value="100"/>
+                <Double fx:value="0"/>
+                <Double fx:value="75"/>
+                <Double fx:value="0"/>
+                <Double fx:value="25"/>
+            </points>
+        </Polygon>
+
+        <!-- TileRow 2: 4 Tiles -->
+        <Polygon fx:id="TileRow2_1" layoutX="200" layoutY="125" stroke="BLACK" strokeWidth="2">
+            <points>
+                <Double fx:value="50"/>
+                <Double fx:value="0"/>
+                <Double fx:value="100"/>
+                <Double fx:value="25"/>
+                <Double fx:value="100"/>
+                <Double fx:value="75"/>
+                <Double fx:value="50"/>
+                <Double fx:value="100"/>
+                <Double fx:value="0"/>
+                <Double fx:value="75"/>
+                <Double fx:value="0"/>
+                <Double fx:value="25"/>
+            </points>
+        </Polygon>
+        <Polygon fx:id="TileRow2_2" layoutX="300" layoutY="125" stroke="BLACK" strokeWidth="2">
+            <points>
+                <Double fx:value="50"/>
+                <Double fx:value="0"/>
+                <Double fx:value="100"/>
+                <Double fx:value="25"/>
+                <Double fx:value="100"/>
+                <Double fx:value="75"/>
+                <Double fx:value="50"/>
+                <Double fx:value="100"/>
+                <Double fx:value="0"/>
+                <Double fx:value="75"/>
+                <Double fx:value="0"/>
+                <Double fx:value="25"/>
+            </points>
+        </Polygon>
+        <Polygon fx:id="TileRow2_3" layoutX="400" layoutY="125" stroke="BLACK" strokeWidth="2">
+            <points>
+                <Double fx:value="50"/>
+                <Double fx:value="0"/>
+                <Double fx:value="100"/>
+                <Double fx:value="25"/>
+                <Double fx:value="100"/>
+                <Double fx:value="75"/>
+                <Double fx:value="50"/>
+                <Double fx:value="100"/>
+                <Double fx:value="0"/>
+                <Double fx:value="75"/>
+                <Double fx:value="0"/>
+                <Double fx:value="25"/>
+            </points>
+        </Polygon>
+        <Polygon fx:id="TileRow2_4" layoutX="500" layoutY="125" stroke="BLACK" strokeWidth="2">
+            <points>
+                <Double fx:value="50"/>
+                <Double fx:value="0"/>
+                <Double fx:value="100"/>
+                <Double fx:value="25"/>
+                <Double fx:value="100"/>
+                <Double fx:value="75"/>
+                <Double fx:value="50"/>
+                <Double fx:value="100"/>
+                <Double fx:value="0"/>
+                <Double fx:value="75"/>
+                <Double fx:value="0"/>
+                <Double fx:value="25"/>
+            </points>
+        </Polygon>
+
+        <!-- TileRow 3: 5 Tiles -->
+        <Polygon fx:id="TileRow3_1" layoutX="150" layoutY="200" stroke="BLACK" strokeWidth="2">
+            <points>
+                <Double fx:value="50"/>
+                <Double fx:value="0"/>
+                <Double fx:value="100"/>
+                <Double fx:value="25"/>
+                <Double fx:value="100"/>
+                <Double fx:value="75"/>
+                <Double fx:value="50"/>
+                <Double fx:value="100"/>
+                <Double fx:value="0"/>
+                <Double fx:value="75"/>
+                <Double fx:value="0"/>
+                <Double fx:value="25"/>
+            </points>
+        </Polygon>
+        <Polygon fx:id="TileRow3_2" layoutX="250" layoutY="200" stroke="BLACK" strokeWidth="2">
+            <points>
+                <Double fx:value="50"/>
+                <Double fx:value="0"/>
+                <Double fx:value="100"/>
+                <Double fx:value="25"/>
+                <Double fx:value="100"/>
+                <Double fx:value="75"/>
+                <Double fx:value="50"/>
+                <Double fx:value="100"/>
+                <Double fx:value="0"/>
+                <Double fx:value="75"/>
+                <Double fx:value="0"/>
+                <Double fx:value="25"/>
+            </points>
+        </Polygon>
+        <Polygon fx:id="TileRow3_3" layoutX="350" layoutY="200" fill="BEIGE" stroke="BLACK" strokeWidth="2">
+            <points>
+                <Double fx:value="50"/>
+                <Double fx:value="0"/>
+                <Double fx:value="100"/>
+                <Double fx:value="25"/>
+                <Double fx:value="100"/>
+                <Double fx:value="75"/>
+                <Double fx:value="50"/>
+                <Double fx:value="100"/>
+                <Double fx:value="0"/>
+                <Double fx:value="75"/>
+                <Double fx:value="0"/>
+                <Double fx:value="25"/>
+            </points>
+        </Polygon>
+        <Polygon fx:id="TileRow3_4" fill="#507aa1" layoutX="450" layoutY="200" stroke="BLACK" strokeWidth="2">
+            <points>
+                <Double fx:value="50"/>
+                <Double fx:value="0"/>
+                <Double fx:value="100"/>
+                <Double fx:value="25"/>
+                <Double fx:value="100"/>
+                <Double fx:value="75"/>
+                <Double fx:value="50"/>
+                <Double fx:value="100"/>
+                <Double fx:value="0"/>
+                <Double fx:value="75"/>
+                <Double fx:value="0"/>
+                <Double fx:value="25"/>
+            </points>
+        </Polygon>
+        <Polygon fx:id="TileRow3_5" layoutX="550" layoutY="200" stroke="BLACK" strokeWidth="2">
+            <points>
+                <Double fx:value="50"/>
+                <Double fx:value="0"/>
+                <Double fx:value="100"/>
+                <Double fx:value="25"/>
+                <Double fx:value="100"/>
+                <Double fx:value="75"/>
+                <Double fx:value="50"/>
+                <Double fx:value="100"/>
+                <Double fx:value="0"/>
+                <Double fx:value="75"/>
+                <Double fx:value="0"/>
+                <Double fx:value="25"/>
+            </points>
+        </Polygon>
+
+        <!-- TileRow 4: 4 Tiles -->
+        <Polygon fx:id="TileRow4_1" layoutX="200" layoutY="275" stroke="BLACK" strokeWidth="2">
+            <points>
+                <Double fx:value="50"/>
+                <Double fx:value="0"/>
+                <Double fx:value="100"/>
+                <Double fx:value="25"/>
+                <Double fx:value="100"/>
+                <Double fx:value="75"/>
+                <Double fx:value="50"/>
+                <Double fx:value="100"/>
+                <Double fx:value="0"/>
+                <Double fx:value="75"/>
+                <Double fx:value="0"/>
+                <Double fx:value="25"/>
+            </points>
+        </Polygon>
+        <Polygon fx:id="TileRow4_2" layoutX="300" layoutY="275" stroke="BLACK" strokeWidth="2">
+            <points>
+                <Double fx:value="50"/>
+                <Double fx:value="0"/>
+                <Double fx:value="100"/>
+                <Double fx:value="25"/>
+                <Double fx:value="100"/>
+                <Double fx:value="75"/>
+                <Double fx:value="50"/>
+                <Double fx:value="100"/>
+                <Double fx:value="0"/>
+                <Double fx:value="75"/>
+                <Double fx:value="0"/>
+                <Double fx:value="25"/>
+            </points>
+        </Polygon>
+        <Polygon fx:id="TileRow4_3" layoutX="400" layoutY="275" stroke="BLACK" strokeWidth="2">
+            <points>
+                <Double fx:value="50"/>
+                <Double fx:value="0"/>
+                <Double fx:value="100"/>
+                <Double fx:value="25"/>
+                <Double fx:value="100"/>
+                <Double fx:value="75"/>
+                <Double fx:value="50"/>
+                <Double fx:value="100"/>
+                <Double fx:value="0"/>
+                <Double fx:value="75"/>
+                <Double fx:value="0"/>
+                <Double fx:value="25"/>
+            </points>
+        </Polygon>
+        <Polygon fx:id="TileRow4_4" layoutX="500" layoutY="275" stroke="BLACK" strokeWidth="2">
+            <points>
+                <Double fx:value="50"/>
+                <Double fx:value="0"/>
+                <Double fx:value="100"/>
+                <Double fx:value="25"/>
+                <Double fx:value="100"/>
+                <Double fx:value="75"/>
+                <Double fx:value="50"/>
+                <Double fx:value="100"/>
+                <Double fx:value="0"/>
+                <Double fx:value="75"/>
+                <Double fx:value="0"/>
+                <Double fx:value="25"/>
+            </points>
+        </Polygon>
+        <!-- TileRow 5: 3 Tiles -->
+        <Polygon fx:id="TileRow5_1" layoutX="250" layoutY="350" stroke="BLACK" strokeWidth="2">
+            <points>
+                <Double fx:value="50"/>
+                <Double fx:value="0"/>
+                <Double fx:value="100"/>
+                <Double fx:value="25"/>
+                <Double fx:value="100"/>
+                <Double fx:value="75"/>
+                <Double fx:value="50"/>
+                <Double fx:value="100"/>
+                <Double fx:value="0"/>
+                <Double fx:value="75"/>
+                <Double fx:value="0"/>
+                <Double fx:value="25"/>
+            </points>
+        </Polygon>
+        <Polygon fx:id="TileRow5_2" layoutX="350" layoutY="350" stroke="BLACK" strokeWidth="2">
+            <points>
+                <Double fx:value="50"/>
+                <Double fx:value="0"/>
+                <Double fx:value="100"/>
+                <Double fx:value="25"/>
+                <Double fx:value="100"/>
+                <Double fx:value="75"/>
+                <Double fx:value="50"/>
+                <Double fx:value="100"/>
+                <Double fx:value="0"/>
+                <Double fx:value="75"/>
+                <Double fx:value="0"/>
+                <Double fx:value="25"/>
+            </points>
+        </Polygon>
+        <Polygon fx:id="TileRow5_3" layoutX="450" layoutY="350" stroke="BLACK" strokeWidth="2">
+            <points>
+                <Double fx:value="50"/>
+                <Double fx:value="0"/>
+                <Double fx:value="100"/>
+                <Double fx:value="25"/>
+                <Double fx:value="100"/>
+                <Double fx:value="75"/>
+                <Double fx:value="50"/>
+                <Double fx:value="100"/>
+                <Double fx:value="0"/>
+                <Double fx:value="75"/>
+                <Double fx:value="0"/>
+                <Double fx:value="25"/>
+            </points>
+        </Polygon>
+    </children>
+</AnchorPane>
