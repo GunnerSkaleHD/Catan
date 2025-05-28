@@ -10,6 +10,7 @@ module org.example.catan {
     requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
     requires annotations;
+    requires static lombok;
 
     opens org.example.catan to javafx.fxml;
     exports org.example.catan;
