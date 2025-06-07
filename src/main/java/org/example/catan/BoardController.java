@@ -4,8 +4,8 @@ import javafx.fxml.FXML;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Polygon;
 import javafx.beans.value.ChangeListener;
-import org.example.catan.Graph.Node;
 
 import java.util.*;
 
@@ -13,53 +13,107 @@ public class BoardController {
 
     @FXML
     private Pane boardPane;
-    private BoardView boardView;
 
-    private List<Player> players = new ArrayList<>();
-    private Player currentPlayer;
+    //hexagon Radius
+    private static final double HEX_SIZE = 50;
+
+    private static final double HEX_WIDTH = Math.sqrt(3) * HEX_SIZE;
+    private static final double HEX_HEIGHT_3_4 = (2 * HEX_SIZE) * 0.75;
+
+    private static final int[] TILES_PER_ROW = {3, 4, 5, 4, 3};
+
+    private final List<Polygon> allTiles = new ArrayList<>();
+
+    private final List<Circle> vertexPoints = new ArrayList<>(); //Kreis für Hausplatzierung
 
     @FXML
     public void initialize() {
-        this.boardView = new BoardView(boardPane);
-
-        // Initialize board with radius 3 (standard Catan board)
-        boardView.initializeBoard(3);
-
-        // Create dummy players
-        players.add(new Player("Player 1", Color.BLUE));
-        players.add(new Player("Player 2", Color.ORANGE));
-        currentPlayer = players.get(0);
-
-        // Add size listener for window resizing
-        ChangeListener<Number> sizeListener = (obs, oldVal, newVal) -> boardView.positionVisuals();
+        createAndColorTiles();
+        ChangeListener<Number> sizeListener = (obs, oldVal, newVal) -> positionTiles();
+    
+        //sizeListener für Fenstergrößte
         boardPane.widthProperty().addListener(sizeListener);
         boardPane.heightProperty().addListener(sizeListener);
-        boardView.positionVisuals();
+        positionTiles();
+    }    
 
-        // Set click handler for settlements
-        boardView.setOnVertexClickHandler(this::handleVertexClick);
+     //Positionsberechnung durch Fenstergröße
+    private void positionTiles() {
+        double paneWidth = boardPane.getWidth();
+        double paneHeight = boardPane.getHeight();
+
+        //Zentierung mittleres feld
+        double startX = (paneWidth / 2.0) - (HEX_WIDTH * 2);
+        double startY = (paneHeight / 2.0) - (HEX_HEIGHT_3_4 * 2);
+
+        int tileIndex = 0;
+
+        for (int row = 0; row < TILES_PER_ROW.length; row++) {
+            int numTilesInRow = TILES_PER_ROW[row];
+            double rowOffsetX = (TILES_PER_ROW[2] - numTilesInRow) * HEX_WIDTH / 2.0;
+
+            for (int col = 0; col < numTilesInRow; col++) {
+                if (tileIndex >= allTiles.size()) break;
+
+                double centerX = startX + rowOffsetX + col * HEX_WIDTH;
+                double centerY = startY + row * HEX_HEIGHT_3_4;
+                
+                Polygon hexagon = allTiles.get(tileIndex);
+                hexagon.setLayoutX(centerX);
+                hexagon.setLayoutY(centerY);
+
+                tileIndex++;
+            }
+        }
     }
 
-    private void handleVertexClick(Circle clickedVertex) {
-        // Get the node associated with this circle
-        Node node = boardView.getNodeFromCircle(clickedVertex);
-
-        // TODO: Add game logic validation here
-        // - Check if settlement can be placed (distance rule, etc.)
-        // - Check if player has resources
-        // - Update game state
-
-        System.out.println("Placing settlement at node: " + node.getId());
-
-        // Place settlement
-        boardView.drawSettlement(clickedVertex, currentPlayer.getColor());
-
-        // Switch to next player (simple implementation)
-        currentPlayer = players.get((players.indexOf(currentPlayer) + 1) % players.size());
+     // Erstellung und Farbzuweisung
+    private void createAndColorTiles() {
+        for (int i = 0; i < 19; i++) {
+            Polygon hexagon = createHexagon();
+            allTiles.add(hexagon);
+        }
+        randomizeTileColors();
+        boardPane.getChildren().addAll(allTiles);
     }
 
-    // Method to get access to the CatanBoard for game logic
-    public CatanBoard getCatanBoard() {
-        return boardView.getCatanBoard();
+    private Polygon createHexagon() {
+        Polygon polygon = new Polygon();
+        for (int i = 0; i < 6; i++) {
+            double angle_deg = 60 * i + 30;
+            double angle_rad = Math.PI / 180 * angle_deg;
+            double pointX = HEX_SIZE * Math.cos(angle_rad);
+            double pointY = HEX_SIZE * Math.sin(angle_rad);
+            polygon.getPoints().addAll(pointX, pointY);
+        }
+        polygon.setStroke(Color.BLACK);
+        polygon.setStrokeWidth(2.0);
+        return polygon;
+    }
+
+    // Zufällige Farbzuweisung
+    public void randomizeTileColors() {
+        List<Color> resourceColors = new ArrayList<>(Arrays.asList(
+                Color.FORESTGREEN, Color.FORESTGREEN, Color.FORESTGREEN, Color.FORESTGREEN,
+                Color.web("#c7ad7f"), Color.web("#c7ad7f"), Color.web("#c7ad7f"), Color.web("#c7ad7f"),
+                Color.GOLD, Color.GOLD, Color.GOLD, Color.GOLD,
+                Color.FIREBRICK, Color.FIREBRICK, Color.FIREBRICK,
+                Color.GRAY, Color.GRAY, Color.GRAY
+        ));
+        Collections.shuffle(resourceColors);
+
+        // Wüste
+        int desertIndex = 9;
+
+        int colorIndex = 0;
+        for (int i = 0; i < allTiles.size(); i++) {
+            if (i == desertIndex) {
+                allTiles.get(i).setFill(Color.SANDYBROWN);
+            } else {
+                if(colorIndex < resourceColors.size()) {
+                    allTiles.get(i).setFill(resourceColors.get(colorIndex++));
+                }
+            }
+        }
     }
 }
