@@ -1,78 +1,119 @@
 package org.example.catan;
 
 import javafx.fxml.FXML;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
+import javafx.beans.value.ChangeListener;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class BoardController {
-    private final Random random = new Random();
-    @FXML
-    private Polygon TileRow1_1;
-    @FXML
-    private Polygon TileRow1_2;
-    @FXML
-    private Polygon TileRow1_3;
-    @FXML
-    private Polygon TileRow2_1;
-    @FXML
-    private Polygon TileRow2_2;
-    @FXML
-    private Polygon TileRow2_3;
-    @FXML
-    private Polygon TileRow2_4;
-    @FXML
-    private Polygon TileRow3_1;
-    @FXML
-    private Polygon TileRow3_2;
-    @FXML
-    private Polygon TileRow3_3;
-    @FXML
-    private Polygon TileRow3_4;
-    @FXML
-    private Polygon TileRow3_5;
-    @FXML
-    private Polygon TileRow4_1;
-    @FXML
-    private Polygon TileRow4_2;
-    @FXML
-    private Polygon TileRow4_3;
-    @FXML
-    private Polygon TileRow4_4;
-    @FXML
-    private Polygon TileRow5_1;
-    @FXML
-    private Polygon TileRow5_2;
-    @FXML
-    private Polygon TileRow5_3;
 
     @FXML
-    public void randomizeTileColors() {
-        List<Color> tileColors = Arrays.asList(Color.FORESTGREEN, Color.FORESTGREEN, Color.FORESTGREEN,
-                Color.FORESTGREEN, Color.FIREBRICK, Color.FIREBRICK, Color.FIREBRICK, Color.GOLD, Color.GOLD,
-                Color.GOLD, Color.GOLD, Color.LIGHTGREEN, Color.LIGHTGREEN, Color.LIGHTGREEN, Color.LIGHTGREEN,
-                Color.GRAY, Color.GRAY, Color.GRAY);
+    private Pane boardPane;
 
-        Collections.shuffle(tileColors, new Random());
+    //hexagon Radius
+    private static final double HEX_SIZE = 50;
 
-        List<Polygon> tiles = Arrays.asList(TileRow1_1, TileRow1_2, TileRow1_3, TileRow2_1, TileRow2_2, TileRow2_3,
-                TileRow2_4, TileRow3_1, TileRow3_2, /*TileRow3_3 (missing?),*/ TileRow3_4, TileRow3_5, TileRow4_1,
-                TileRow4_2, TileRow4_3, TileRow4_4, TileRow5_1, TileRow5_2, TileRow5_3);
+    private static final double HEX_WIDTH = Math.sqrt(3) * HEX_SIZE;
+    private static final double HEX_HEIGHT_3_4 = (2 * HEX_SIZE) * 0.75;
 
-        for (int i = 0; i < tiles.size(); i++) {
-            tiles.get(i).setFill(tileColors.get(i));
-        }
-    }
+    private static final int[] TILES_PER_ROW = {3, 4, 5, 4, 3};
 
+    private final List<Polygon> allTiles = new ArrayList<>();
+
+    private final List<Circle> vertexPoints = new ArrayList<>(); //Kreis für Hausplatzierung
 
     @FXML
     public void initialize() {
-        randomizeTileColors();
+        createAndColorTiles();
+        ChangeListener<Number> sizeListener = (obs, oldVal, newVal) -> positionTiles();
+    
+        //sizeListener für Fenstergrößte
+        boardPane.widthProperty().addListener(sizeListener);
+        boardPane.heightProperty().addListener(sizeListener);
+        positionTiles();
+    }    
+
+     //Positionsberechnung durch Fenstergröße
+    private void positionTiles() {
+        double paneWidth = boardPane.getWidth();
+        double paneHeight = boardPane.getHeight();
+
+        //Zentierung mittleres feld
+        double startX = (paneWidth / 2.0) - (HEX_WIDTH * 2);
+        double startY = (paneHeight / 2.0) - (HEX_HEIGHT_3_4 * 2);
+
+        int tileIndex = 0;
+
+        for (int row = 0; row < TILES_PER_ROW.length; row++) {
+            int numTilesInRow = TILES_PER_ROW[row];
+            double rowOffsetX = (TILES_PER_ROW[2] - numTilesInRow) * HEX_WIDTH / 2.0;
+
+            for (int col = 0; col < numTilesInRow; col++) {
+                if (tileIndex >= allTiles.size()) break;
+
+                double centerX = startX + rowOffsetX + col * HEX_WIDTH;
+                double centerY = startY + row * HEX_HEIGHT_3_4;
+                
+                Polygon hexagon = allTiles.get(tileIndex);
+                hexagon.setLayoutX(centerX);
+                hexagon.setLayoutY(centerY);
+
+                tileIndex++;
+            }
+        }
     }
 
+     // Erstellung und Farbzuweisung
+    private void createAndColorTiles() {
+        for (int i = 0; i < 19; i++) {
+            Polygon hexagon = createHexagon();
+            allTiles.add(hexagon);
+        }
+        randomizeTileColors();
+        boardPane.getChildren().addAll(allTiles);
+    }
 
+    private Polygon createHexagon() {
+        Polygon polygon = new Polygon();
+        for (int i = 0; i < 6; i++) {
+            double angle_deg = 60 * i + 30;
+            double angle_rad = Math.PI / 180 * angle_deg;
+            double pointX = HEX_SIZE * Math.cos(angle_rad);
+            double pointY = HEX_SIZE * Math.sin(angle_rad);
+            polygon.getPoints().addAll(pointX, pointY);
+        }
+        polygon.setStroke(Color.BLACK);
+        polygon.setStrokeWidth(2.0);
+        return polygon;
+    }
+
+    // Zufällige Farbzuweisung
+    public void randomizeTileColors() {
+        List<Color> resourceColors = new ArrayList<>(Arrays.asList(
+                Color.FORESTGREEN, Color.FORESTGREEN, Color.FORESTGREEN, Color.FORESTGREEN,
+                Color.web("#c7ad7f"), Color.web("#c7ad7f"), Color.web("#c7ad7f"), Color.web("#c7ad7f"),
+                Color.GOLD, Color.GOLD, Color.GOLD, Color.GOLD,
+                Color.FIREBRICK, Color.FIREBRICK, Color.FIREBRICK,
+                Color.GRAY, Color.GRAY, Color.GRAY
+        ));
+        Collections.shuffle(resourceColors);
+
+        // Wüste
+        int desertIndex = 9;
+
+        int colorIndex = 0;
+        for (int i = 0; i < allTiles.size(); i++) {
+            if (i == desertIndex) {
+                allTiles.get(i).setFill(Color.SANDYBROWN);
+            } else {
+                if(colorIndex < resourceColors.size()) {
+                    allTiles.get(i).setFill(resourceColors.get(colorIndex++));
+                }
+            }
+        }
+    }
 }
