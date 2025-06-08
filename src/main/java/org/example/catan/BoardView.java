@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import javafx.geometry.Point2D;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -39,17 +38,24 @@ public class BoardView {
 
     //Siedlungsplätze initialisieren an Ecken
     public void initializeVertexPoints() {
-        for (int i = 0; i < 54; i++) {
-            Circle vertex = new Circle(8);
-            vertex.setFill(Color.ORANGERED.deriveColor(1, 1, 1, 0.5));
-            vertex.setStroke(Color.RED);
-            vertex.setOnMouseClicked(event -> {
-            if (onVertexClickCallback != null) {
-                onVertexClickCallback.accept(vertex);
-            }});
-            vertexPoints.add(vertex); // Füge den Kreis zur Liste hinzu
+        for (Polygon tile : allTiles) {
+            for (int i = 0; i < 6; i++) {
+                Circle vertex = new Circle(8);
+                vertex.setFill(Color.ORANGERED.deriveColor(1, 1, 1, 0.5));
+                vertex.setStroke(Color.RED);
+                
+                //Referenz zum Eltern-Hexagon und dem Eck-Index
+                vertex.setUserData(new Object[]{tile, i});
+                
+                vertex.setOnMouseClicked(event -> {
+                    if (onVertexClickCallback != null) {
+                        onVertexClickCallback.accept(vertex);
+                    }
+                });
+                vertexPoints.add(vertex);
+                boardPane.getChildren().add(vertex);
+            }
         }
-        boardPane.getChildren().addAll(vertexPoints); // Füge alle Kreise zur Anzeige hinzu
     }
 
     //Gesamte Positionierung
@@ -82,31 +88,31 @@ public class BoardView {
             }
         }
 
-        //Positionierung der Kreise (Siedlungsplätze)
-        List<Point2D> uniqueVertexCoordinates = new ArrayList<>();
-        Map<String, Point2D> uniqueVerticesMap = new LinkedHashMap<>();
+        //Platzierung der Siedlungsplätze
+        Map<String, Circle> uniqueCirclesMap = new LinkedHashMap<>();
 
-        //Berechnung und Speicherung Koordinaten
-        for (Polygon hexagon : allTiles) {
-            for (int i = 0; i < 6; i++) {
-                double x = hexagon.getLayoutX() + hexagon.getPoints().get(i * 2);
-                double y = hexagon.getLayoutY() + hexagon.getPoints().get(i * 2 + 1);
-                String key = Math.round(x) + ":" + Math.round(y);
-
-                if (!uniqueVerticesMap.containsKey(key)) {
-                    uniqueVerticesMap.put(key, new Point2D(x, y));
-                }
-            }
-        }
-        uniqueVertexCoordinates.addAll(uniqueVerticesMap.values());
-
-        //Positioniere die existierenden Kreise auf den neu berechneten Koordinaten
-        for (int i = 0; i < uniqueVertexCoordinates.size(); i++) {
-            if (i < vertexPoints.size()) {
-                Circle vertex = vertexPoints.get(i);
-                Point2D pos = uniqueVertexCoordinates.get(i);
-                vertex.setCenterX(pos.getX());
-                vertex.setCenterY(pos.getY());
+        for (Circle vertex : vertexPoints) {
+            //Informationen über Hexagon und Ecke
+            Object[] data = (Object[]) vertex.getUserData();
+            Polygon parentTile = (Polygon) data[0];
+            int cornerIndex = (int) data[1];
+            
+            //Position berechnen
+            double x = parentTile.getLayoutX() + parentTile.getPoints().get(cornerIndex * 2);
+            double y = parentTile.getLayoutY() + parentTile.getPoints().get(cornerIndex * 2 + 1);
+            
+            vertex.setCenterX(x);
+            vertex.setCenterY(y);
+            
+            //Kreis-Duplikate ausblenden
+            String key = Math.round(x) + ":" + Math.round(y);
+            if (uniqueCirclesMap.containsKey(key)) {
+                //Wenn Kreis schon existiert
+                vertex.setVisible(false);
+            } else {
+                //Wenn Kreis neu ist
+                vertex.setVisible(true);
+                uniqueCirclesMap.put(key, vertex);
             }
         }
 
