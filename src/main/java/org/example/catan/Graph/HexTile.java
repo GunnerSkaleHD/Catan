@@ -1,6 +1,7 @@
 package org.example.catan.Graph;
 //import de.dhbw.bank.Bank;
 //import de.dhbw.player.Player;
+import lombok.ToString;
 import org.example.catan.Resources;
 import lombok.Getter;
 
@@ -13,6 +14,7 @@ import java.util.Arrays;
      * */
 
     @Getter
+    @ToString
 public class HexTile {
     private int diceNumber;
     private Resources resourceType;

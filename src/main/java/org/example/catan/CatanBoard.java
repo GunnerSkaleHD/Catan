@@ -31,6 +31,11 @@ public class CatanBoard {
     static Node[] nodes;
     int[][][] graph;
 
+    public void test(int x, int y) {
+        IntTupel key = new IntTupel(x, y);
+        HexTile tile = board.get(key);
+        System.out.println(tile);
+    }
     private static final int STREET = 0;
     private static final int PLAYER = 1;
 
