@@ -4,11 +4,7 @@ import org.example.catan.Graph.*;
 import org.example.catan.Resources;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-
+import java.util.*;
 
 
 //resourcen zuordnen - check
@@ -169,6 +165,7 @@ public class CatanBoard {
         };
 
         ArrayList<Resources> allResources = generateResourceTypes(hex_coords.length - 1);
+        ArrayList<Integer> allDiceNumbers = generateDiceNumbers();
         allResources.add(Resources.NONE);
         Random rand = new Random();
         System.out.println("Alle Ressourcen: " + allResources);
@@ -212,8 +209,18 @@ public class CatanBoard {
             }
 
             int randomIndex = rand.nextInt(allResources.size());
-            board.put(coords, new HexTile(0, allResources.get(randomIndex), HexNodes));
+            Resources selectedResource = allResources.get(randomIndex);
+            int diceNumber;
+
+            if (selectedResource.equals(Resources.NONE)) {
+                diceNumber = 0; // desert, no dice number
+            } else {
+                diceNumber = allDiceNumbers.remove(0); // always take first available
+            }
+
+            board.put(coords, new HexTile(diceNumber, selectedResource, HexNodes));
             allResources.remove(randomIndex);
+
         }
 
         System.out.println("Graph created");
@@ -248,5 +255,14 @@ public class CatanBoard {
             }
         }
         return allResources;
+    }
+    private static ArrayList<Integer> generateDiceNumbers() {
+        ArrayList<Integer> diceNumbers = new ArrayList<>(Arrays.asList(
+                2, 3, 3, 4, 4, 5, 5, 6, 6,
+                8, 8, 9, 9, 10, 10, 11, 11, 12
+        ));
+
+        Collections.shuffle(diceNumbers);
+        return diceNumbers;
     }
 }
