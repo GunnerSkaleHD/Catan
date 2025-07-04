@@ -46,19 +46,19 @@ public abstract class Player {
         resources.put(type, resources.getOrDefault(type, 0) + amount);
     }
 
-    public void addDevelopmentCard(Development card) {
-        developmentCards.add(card);
-    }
-
-    public abstract void buySettlement(Bank bank);
-
-    public abstract void buyCity(Bank bank);
-
-    public abstract void buyRoad(Bank bank);
-
-    public abstract void buyCard(Bank bank);
-
-    public abstract void trade();
+//    public void addDevelopmentCard(Development card) {
+//        developmentCards.add(card);
+//    }
+//
+//    public abstract void buySettlement(Bank bank);
+//
+//    public abstract void buyCity(Bank bank);
+//
+//    public abstract void buyRoad(Bank bank);
+//
+//    public abstract void buyCard(Bank bank);
+//
+//    public abstract void trade();
 
 
     // Just testing

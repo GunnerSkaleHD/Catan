@@ -23,6 +23,7 @@ public class main {
         board.test(-2,  2);
         board.test(-1,  2);
         board.test( 0,  2);
+        System.out.println(board.availableStreet(0,1));
 
     }
 }

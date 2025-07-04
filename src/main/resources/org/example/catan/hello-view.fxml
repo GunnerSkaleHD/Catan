@@ -2,5 +2,5 @@
 
 <?import javafx.scene.layout.Pane?>
 <Pane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.example.catan.BoardController"
+      fx:controller="org.example.catan.GameController"
       fx:id="boardPane" prefHeight="800.0" prefWidth="1200.0" />
