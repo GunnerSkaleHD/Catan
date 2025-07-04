@@ -34,26 +34,39 @@ public class BoardView {
     }
 
     public void loadBoardFromModel(CatanBoard catanBoard) {
+        // First pass: create and add all hexagons
         for (Map.Entry<IntTupel, HexTile> entry : catanBoard.getBoard().entrySet()) {
             IntTupel coord = entry.getKey();
             HexTile tile = entry.getValue();
 
-            // Axial to pixel
             double paneWidth = boardPane.getWidth();
             double paneHeight = boardPane.getHeight();
 
-            // Center offset based on board size (assume radius ~2)
             double offsetX = paneWidth / 2.0;
             double offsetY = paneHeight / 2.0;
 
             double centerX = offsetX + HEX_SIZE * Math.sqrt(3) * (coord.q() + coord.r() / 2.0);
             double centerY = offsetY + HEX_SIZE * 1.5 * coord.r();
 
-
             Polygon hex = createHexagon(centerX, centerY);
             hex.setFill(resourceToColor(tile.getResourceType()));
             allTiles.add(hex);
-            boardPane.getChildren().add(hex);
+            boardPane.getChildren().add(hex); // 🔹 HEXES FIRST
+        }
+
+        // Second pass: place node circles
+        for (Map.Entry<IntTupel, HexTile> entry : catanBoard.getBoard().entrySet()) {
+            IntTupel coord = entry.getKey();
+            HexTile tile = entry.getValue();
+
+            double paneWidth = boardPane.getWidth();
+            double paneHeight = boardPane.getHeight();
+
+            double offsetX = paneWidth / 2.0;
+            double offsetY = paneHeight / 2.0;
+
+            double centerX = offsetX + HEX_SIZE * Math.sqrt(3) * (coord.q() + coord.r() / 2.0);
+            double centerY = offsetY + HEX_SIZE * 1.5 * coord.r();
 
             for (int i = 0; i < tile.getHexTileNodes().length; i++) {
                 Node node = tile.getHexTileNodes()[i];
@@ -72,16 +85,19 @@ public class BoardView {
                     vertex.setUserData(node);
 
                     vertex.setOnMouseClicked(event -> {
+                        Node clickedNode = (Node) vertex.getUserData();
+                        System.out.println("Node " + clickedNode.getId() + " was pressed.");
+
                         if (onVertexClickCallback != null) {
                             onVertexClickCallback.accept(vertex);
                         }
                     });
 
+
                     nodeCircles.put(node.getId(), vertex);
-                    boardPane.getChildren().add(vertex);
+                    boardPane.getChildren().add(vertex); // 🔺 CIRCLES AFTER HEXES
                 }
             }
-
         }
 
         // Reposition already placed settlements
@@ -97,7 +113,7 @@ public class BoardView {
         Polygon hex = new Polygon();
         for (int i = 0; i < 6; i++) {
             double angle_deg = 60 * i + 30;
-            double angle_rad = Math.PI / 180 * angle_deg;
+            double angle_rad = Math.toRadians(angle_deg);
             double x = centerX + HEX_SIZE * Math.cos(angle_rad);
             double y = centerY + HEX_SIZE * Math.sin(angle_rad);
             hex.getPoints().addAll(x, y);
