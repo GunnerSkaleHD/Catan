@@ -1,6 +1,8 @@
 package org.example.catan;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -12,202 +14,130 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
-
-import org.example.catan.Graph.HexTile;
-import org.example.catan.Graph.IntTupel;
-import org.example.catan.Graph.Node;
 
 public class BoardView {
-    // Hexagon dimensions
+    //hexagon Größen
     private static final double HEX_SIZE = 50;
     private static final double HEX_WIDTH = Math.sqrt(3) * HEX_SIZE;
-    private static final double HEX_HEIGHT = 2 * HEX_SIZE;
+    private static final double HEX_HEIGHT_3_4 = (2 * HEX_SIZE) * 0.75;
 
-    // Game elements
+    private static final int[] TILES_PER_ROW = {3, 4, 5, 4, 3};
+
+    //Listen und Maps für Spielelemente
     private final List<Polygon> allTiles = new ArrayList<>();
-    private final List<Circle> vertexPoints = new ArrayList<>();
-    private final List<Text> diceNumbers = new ArrayList<>();
-    private final Map<Circle, Rectangle> placedSettlements = new HashMap<>();
-    private final Map<Resources, Color> resourceColors = new HashMap<>();
-
-    // Board logic integration
-    private CatanBoard catanBoard;
-    private Map<IntTupel, Polygon> hexagonMap = new HashMap<>();
-    private Map<Node, Circle> nodeCircleMap = new HashMap<>();
+    private final List<Circle> vertexPoints = new ArrayList<>(); //Kreis für Siedlungsplatzierung
+    private final Map<Circle, Rectangle> placedSettlements = new HashMap<>(); //Map für platzierte Siedlungen
 
     private Consumer<Circle> onVertexClickCallback;
+
     private final Pane boardPane;
 
     public BoardView(Pane boardPane) {
         this.boardPane = boardPane;
-        initializeResourceColors();
     }
 
-    private void initializeResourceColors() {
-        resourceColors.put(Resources.WOOD, Color.FORESTGREEN);
-        resourceColors.put(Resources.BRICK, Color.FIREBRICK);
-        resourceColors.put(Resources.SHEEP, Color.web("#c7ad7f")); // Light green/beige
-        resourceColors.put(Resources.WHEAT, Color.GOLD);
-        resourceColors.put(Resources.STONE, Color.GRAY);
-        resourceColors.put(Resources.NONE, Color.SANDYBROWN); // Desert
-    }
-
-    // Initialize board with CatanBoard logic
-    public void initializeBoard(int radius) {
-        catanBoard = new CatanBoard(radius);
-        createTilesFromBoard();
-        initializeVertexPoints();
-    }
-
-    // Create hexagon tiles based on CatanBoard data
-    private void createTilesFromBoard() {
-        for (IntTupel coords : catanBoard.hex_coords) {
-            HexTile hexTile = catanBoard.board.get(coords);
-            if (hexTile != null) {
-                Polygon hexagon = createHexagon();
-
-                // Set color based on resource type
-                Color resourceColor = resourceColors.get(hexTile.getResourceType());
-                hexagon.setFill(resourceColor);
-
-                allTiles.add(hexagon);
-                hexagonMap.put(coords, hexagon);
-
-                // Create dice number text if not desert
-                if (hexTile.getDiceNumber() > 0) {
-                    Text diceText = createDiceNumberText(hexTile.getDiceNumber());
-                    diceNumbers.add(diceText);
-                    boardPane.getChildren().add(diceText);
-                }
-            }
-        }
-        boardPane.getChildren().addAll(allTiles);
-    }
-
-    // Create dice number text
-    private Text createDiceNumberText(int diceNumber) {
-        Text text = new Text(String.valueOf(diceNumber));
-        text.setFont(Font.font("Arial", FontWeight.BOLD, 18));
-        text.setTextAlignment(TextAlignment.CENTER);
-
-        // Highlight 6 and 8 in red
-        if (diceNumber == 6 || diceNumber == 8) {
-            text.setFill(Color.RED);
-        } else {
-            text.setFill(Color.BLACK);
-        }
-
-        return text;
-    }
-
-    // Create settlement points at hex vertices
+    //Siedlungsplätze initialisieren an Ecken
     public void initializeVertexPoints() {
-        Map<Node, Circle> processedNodes = new HashMap<>();
-
-        for (IntTupel coords : catanBoard.hex_coords) {
-            HexTile hexTile = catanBoard.board.get(coords);
-            if (hexTile != null) {
-                Node[] nodes = hexTile.getHexTileNodes();
-
-                for (int i = 0; i < nodes.length; i++) {
-                    Node node = nodes[i];
-
-                    // Only create one circle per unique node
-                    if (!processedNodes.containsKey(node)) {
-                        Circle vertex = new Circle(8);
-                        vertex.setFill(Color.ORANGERED.deriveColor(1, 1, 1, 0.5));
-                        vertex.setStroke(Color.RED);
-
-                        // Store reference to the node
-                        vertex.setUserData(node);
-
-                        vertex.setOnMouseClicked(event -> {
-                            if (onVertexClickCallback != null) {
-                                onVertexClickCallback.accept(vertex);
-                            }
-                        });
-
-                        vertexPoints.add(vertex);
-                        processedNodes.put(node, vertex);
-                        nodeCircleMap.put(node, vertex);
-                        boardPane.getChildren().add(vertex);
+        for (Polygon tile : allTiles) {
+            for (int i = 0; i < 6; i++) {
+                Circle vertex = new Circle(8);
+                vertex.setFill(Color.ORANGERED.deriveColor(1, 1, 1, 0.5));
+                vertex.setStroke(Color.RED);
+                
+                //Referenz zum Eltern-Hexagon und dem Eck-Index
+                vertex.setUserData(new Object[]{tile, i});
+                
+                vertex.setOnMouseClicked(event -> {
+                    if (onVertexClickCallback != null) {
+                        onVertexClickCallback.accept(vertex);
                     }
-                }
+                });
+                vertexPoints.add(vertex);
+                boardPane.getChildren().add(vertex);
             }
         }
     }
 
-    // Position all visual elements
+    //Gesamte Positionierung
     public void positionVisuals() {
         double paneWidth = boardPane.getWidth();
         double paneHeight = boardPane.getHeight();
 
-        double centerX = paneWidth / 2.0;
-        double centerY = paneHeight / 2.0;
+        //Zentrierung mittleres feld
+        double startX = (paneWidth / 2.0) - (HEX_WIDTH * 2);
+        double startY = (paneHeight / 2.0) - (HEX_HEIGHT_3_4 * 2);
 
-        // Position hexagons
-        int diceTextIndex = 0;
-        for (IntTupel coords : catanBoard.hex_coords) {
-            HexTile hexTile = catanBoard.board.get(coords);
-            if (hexTile != null) {
-                Polygon hexagon = hexagonMap.get(coords);
+        int tileIndex = 0;
 
-                // Convert axial coordinates to pixel coordinates
-                double x = centerX + HEX_WIDTH * (coords.q() + coords.r() / 2.0);
-                double y = centerY + HEX_HEIGHT * 0.75 * coords.r();
+        //Positionierung der Hexagone
+        for (int row = 0; row < TILES_PER_ROW.length; row++) {
+            int numTilesInRow = TILES_PER_ROW[row];
+            double rowOffsetX = (TILES_PER_ROW[2] - numTilesInRow) * HEX_WIDTH / 2.0;
 
-                hexagon.setLayoutX(x);
-                hexagon.setLayoutY(y);
+            for (int col = 0; col < numTilesInRow; col++) {
+                if (tileIndex >= allTiles.size()) break;
 
-                // Position dice number text
-                if (hexTile.getDiceNumber() > 0 && diceTextIndex < diceNumbers.size()) {
-                    Text diceText = diceNumbers.get(diceTextIndex);
-                    diceText.setLayoutX(x - 8); // Offset for text centering
-                    diceText.setLayoutY(y + 5); // Offset for text centering
-                    diceTextIndex++;
-                }
+                double centerX = startX + rowOffsetX + col * HEX_WIDTH;
+                double centerY = startY + row * HEX_HEIGHT_3_4;
+                
+                Polygon hexagon = allTiles.get(tileIndex);
+                hexagon.setLayoutX(centerX);
+                hexagon.setLayoutY(centerY);
+
+                tileIndex++;
             }
         }
 
-        // Position vertex points
-        for (IntTupel coords : catanBoard.hex_coords) {
-            HexTile hexTile = catanBoard.board.get(coords);
-            if (hexTile != null) {
-                Node[] nodes = hexTile.getHexTileNodes();
-                Polygon hexagon = hexagonMap.get(coords);
+        //Platzierung der Siedlungsplätze
+        Map<String, Circle> uniqueCirclesMap = new LinkedHashMap<>();
 
-                for (int i = 0; i < nodes.length; i++) {
-                    Node node = nodes[i];
-                    Circle vertex = nodeCircleMap.get(node);
-
-                    if (vertex != null) {
-                        // Calculate vertex position
-                        double angle = Math.PI / 3 * i + Math.PI / 6; // Start at 30 degrees
-                        double x = hexagon.getLayoutX() + HEX_SIZE * Math.cos(angle);
-                        double y = hexagon.getLayoutY() + HEX_SIZE * Math.sin(angle);
-
-                        vertex.setCenterX(x);
-                        vertex.setCenterY(y);
-                    }
-                }
+        for (Circle vertex : vertexPoints) {
+            //Informationen über Hexagon und Ecke
+            Object[] data = (Object[]) vertex.getUserData();
+            Polygon parentTile = (Polygon) data[0];
+            int cornerIndex = (int) data[1];
+            
+            //Position berechnen
+            double x = parentTile.getLayoutX() + parentTile.getPoints().get(cornerIndex * 2);
+            double y = parentTile.getLayoutY() + parentTile.getPoints().get(cornerIndex * 2 + 1);
+            
+            vertex.setCenterX(x);
+            vertex.setCenterY(y);
+            
+            //Kreis-Duplikate ausblenden
+            String key = Math.round(x) + ":" + Math.round(y);
+            if (uniqueCirclesMap.containsKey(key)) {
+                //Wenn Kreis schon existiert
+                vertex.setVisible(false);
+            } else {
+                //Wenn Kreis neu ist
+                vertex.setVisible(true);
+                uniqueCirclesMap.put(key, vertex);
             }
         }
 
-        // Reposition placed settlements
+        //Positioniere die bereits platzierten Häuser neu
         for (Map.Entry<Circle, Rectangle> entry : placedSettlements.entrySet()) {
             Circle vertex = entry.getKey();
             Rectangle house = entry.getValue();
 
+            // Neupositionierung & Zentrierung
             house.setLayoutX(vertex.getCenterX() - house.getWidth() / 2);
             house.setLayoutY(vertex.getCenterY() - house.getHeight() / 2);
         }
     }
 
-    // Create a hexagon polygon
+    // Erstellung und Farbzuweisung aller felder
+    public void createAndColorTiles() {
+        for (int i = 0; i < 19; i++) {
+            Polygon hexagon = createHexagon();
+            allTiles.add(hexagon);
+        }
+        randomizeTileColors();
+        boardPane.getChildren().addAll(allTiles);
+    }
+
+    // Erstellung eines Hexagons mit 6 Eckpunkten
     private Polygon createHexagon() {
         Polygon polygon = new Polygon();
         for (int i = 0; i < 6; i++) {
@@ -222,32 +152,50 @@ public class BoardView {
         return polygon;
     }
 
-    // Draw settlement at clicked vertex
-    public void drawSettlement(Circle clickedVertex, Color playerColor) {
+    // Zufällige Farbzuweisung
+    public void randomizeTileColors() {
+        List<Color> resourceColors = new ArrayList<>(Arrays.asList(
+                Color.FORESTGREEN, Color.FORESTGREEN, Color.FORESTGREEN, Color.FORESTGREEN,
+                Color.web("#c7ad7f"), Color.web("#c7ad7f"), Color.web("#c7ad7f"), Color.web("#c7ad7f"),
+                Color.GOLD, Color.GOLD, Color.GOLD, Color.GOLD,
+                Color.FIREBRICK, Color.FIREBRICK, Color.FIREBRICK,
+                Color.GRAY, Color.GRAY, Color.GRAY
+        ));
+        Collections.shuffle(resourceColors);
+
+        // Wüste
+        int desertIndex = 9;
+
+        int colorIndex = 0;
+        for (int i = 0; i < allTiles.size(); i++) {
+            if (i == desertIndex) {
+                allTiles.get(i).setFill(Color.SANDYBROWN); //Wüste
+            } else {
+                if(colorIndex < resourceColors.size()) {
+                    allTiles.get(i).setFill(resourceColors.get(colorIndex++));
+                }
+            }
+        }
+    }
+
+    //Siedlung zeichnen
+    public void drawSettlement(Circle clickedVertex, Color playerColor){
         Rectangle house = new Rectangle(16, 16);
         house.setLayoutX(clickedVertex.getCenterX() - house.getWidth() / 2);
         house.setLayoutY(clickedVertex.getCenterY() - house.getHeight() / 2);
-
+        
         house.setFill(playerColor);
         house.setStroke(Color.BLACK);
         boardPane.getChildren().add(house);
-
-        placedSettlements.put(clickedVertex, house);
+        
+        placedSettlements.put(clickedVertex, house); 
+        
         clickedVertex.setVisible(false);
     }
 
-    // Set click handler for vertices
+    //Klick-Handler für Siedlungsplätze
     public void setOnVertexClickHandler(Consumer<Circle> callback) {
         this.onVertexClickCallback = callback;
     }
 
-    // Get the CatanBoard instance
-    public CatanBoard getCatanBoard() {
-        return catanBoard;
-    }
-
-    // Get the node associated with a circle
-    public Node getNodeFromCircle(Circle circle) {
-        return (Node) circle.getUserData();
-    }
 }
