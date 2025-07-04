@@ -11,7 +11,7 @@ import java.util.List;
 
 public class GameController {
 
-    private CatanBoard board = new CatanBoard(3); // assumes 3 is the correct config/depth
+    private CatanBoard board;  // assumes 3 is the correct config/depth
     @FXML
     private Pane boardPane;
     private BoardView boardView;
@@ -21,6 +21,31 @@ public class GameController {
 
     @FXML
     public void initialize() {
+        board = new CatanBoard(3);
+//        board.test(0, -2);
+//        board.test(1, -2);
+//        board.test(2, -2);
+//
+//        board.test(-1, -1);
+//        board.test(0, -1);
+//        board.test(1, -1);
+//        board.test(2, -1);
+//
+//        board.test(-2, 0);
+//        board.test(-1, 0);
+//        board.test(0, 0);
+//        board.test(1, 0);
+//        board.test(2, 0);
+//
+//        board.test(-2, 1);
+//        board.test(-1, 1);
+//        board.test(0, 1);
+//        board.test(1, 1);
+//
+//        board.test(-2, 2);
+//        board.test(-1, 2);
+//        board.test(0, 2);
+
         // Instantiate BoardView with the board model
         this.boardView = new BoardView(boardPane, board);
 
