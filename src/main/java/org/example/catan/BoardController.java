@@ -1,12 +1,13 @@
 package org.example.catan;
 
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.beans.value.ChangeListener;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class BoardController {
 
@@ -14,8 +15,8 @@ public class BoardController {
     private Pane boardPane;
     private BoardView boardView;
 
-    private List<Player> players = new ArrayList<>(); //Dummyklasse für Spieler
-    private Player currentPlayer;
+    private List<StandardPlayer> players = new ArrayList<>(); //Dummyklasse für Spieler
+    private StandardPlayer currentPlayer;
 
     @FXML
     public void initialize() {
@@ -25,8 +26,8 @@ public class BoardController {
         boardView.initializeVertexPoints();
 
         //Dummy-Spieler
-        players.add(new Player("Player 1", Color.BLUE));
-        players.add(new Player("Player 2", Color.ORANGE));
+        players.add(new StandardPlayer("Color.BLUE"));
+        players.add(new StandardPlayer("Color.ORANGE"));
         currentPlayer = players.get(0);
 
         //sizeListener für Fenstergröße

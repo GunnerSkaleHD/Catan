@@ -1,14 +1,19 @@
 package org.example.catan;
 
-import java.util.*;
+import javafx.scene.paint.Color;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public abstract class Player {
-    protected String color;
+    protected Color color;
     protected Map<String, Integer> resources;
     protected List<Development> developmentCards;
 
-    public Player(String color) {
-        this.color = color.toLowerCase();
+    public Player(Color color) {
+        this.color = color;
         this.resources = new HashMap<>();
         this.developmentCards = new ArrayList<>();
 
@@ -19,9 +24,10 @@ public abstract class Player {
         resources.put("bricks", 0);
     }
 
-   public String getColor() {
-    return color;
-   }
+    public Color getColor() {
+        return color;
+    }
+
     public boolean hasResource(String type, int amount) {
         return resources.getOrDefault(type.toLowerCase(), 0) >= amount;
     }
@@ -43,10 +49,15 @@ public abstract class Player {
     public void addDevelopmentCard(Development card) {
         developmentCards.add(card);
     }
+
     public abstract void buySettlement(Bank bank);
+
     public abstract void buyCity(Bank bank);
+
     public abstract void buyRoad(Bank bank);
+
     public abstract void buyCard(Bank bank);
+
     public abstract void trade();
 
 
