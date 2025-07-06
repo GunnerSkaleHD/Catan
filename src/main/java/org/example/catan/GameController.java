@@ -3,10 +3,12 @@ package org.example.catan;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import org.example.catan.Graph.HexTile;
 import org.example.catan.Graph.Node;
 
 import java.util.ArrayList;
@@ -24,6 +26,9 @@ public class GameController {
     private BoardView boardView;
     private Player currentPlayer;
     private int[][] adjacencyMatrix;
+    private int currentPlayerIndex;
+    private int currentPlayerDiceRolls;
+    private Bank bank;
 
     private boolean canBuildStreet(Player player) {
         return player.getResourceCount(Resources.WOOD) >= 1 &&
@@ -41,15 +46,16 @@ public class GameController {
 
     @FXML
     public void initialize() {
+        currentPlayerIndex = 0;
+        bank = new Bank();
 
 
-        // Dummy players
-        players.add(new Player(Color.WHITE));
-        players.add(new Player(Color.ORANGE));
         players.add(new Player(Color.BLUE));
         players.add(new Player(Color.RED));
-        currentPlayer = players.getFirst();
+        players.add(new Player(Color.YELLOW));
+        players.add(new Player(Color.WHITE));
 
+        currentPlayer = players.getFirst();
 
         board = new CatanBoard(3);
         adjacencyMatrix = new int[54][54];
@@ -60,6 +66,9 @@ public class GameController {
         }
 
         setupBoardView();
+//        boardView.setOnEndTurn(this::nextPlayer);
+//        boardView.setOnRollDice(this::rollDice);
+
 
         Platform.runLater(() -> {
             boardView.setCurrentPlayer(currentPlayer);
@@ -72,7 +81,9 @@ public class GameController {
             this.boardView = new BoardView(boardPane, board, adjacencyMatrix);
             boardView.setCurrentPlayer(currentPlayer);
             boardView.setOnVertexClickHandler(this::handleVertexClick);
-            boardView.setOnRoadClickHandler(this::handleEdgeClick); // ✅ Use proper method
+            boardView.setOnRoadClickHandler(this::handleEdgeClick);
+            boardView.setOnEndTurn(this::nextPlayer);
+            boardView.setOnRollDice(this::rollDice);
         };
 
 
@@ -82,9 +93,10 @@ public class GameController {
         // Initial click handler setup
         boardView.setOnVertexClickHandler(this::handleVertexClick);
         boardView.setOnRoadClickHandler(this::handleEdgeClick);
-
+        boardPane.setStyle("-fx-background-color: LIGHTBLUE;");
 
     }
+
 
     private void handleEdgeClick(Line ghostLine) {
         int[] nodes = (int[]) ghostLine.getUserData();
@@ -92,11 +104,15 @@ public class GameController {
             System.out.println("❌ Invalid edge click data.");
             return;
         }
-
-        if (!canBuildStreet(currentPlayer)) {
-//            System.out.println("❌ Not enough resources to build a street.");
+        if (currentPlayerDiceRolls == 0) {
             return;
         }
+
+        if (!canBuildStreet(currentPlayer) || !bank.useStreet()) {
+            System.out.println("🚫 Cannot build street (resources or bank limit).");
+            return;
+        }
+
 
         // Try to update the model first
         boolean placed = currentPlayer.placeStreet(nodes[0], nodes[1]);
@@ -114,7 +130,12 @@ public class GameController {
     private void handleVertexClick(Circle clickedVertex) {
         Node node = (Node) clickedVertex.getUserData();
         int nodeId = node.getId();
-        if (!canBuildSettlement(currentPlayer)) {
+        if (!canBuildSettlement(currentPlayer) || !bank.useSettlement()) {
+            System.out.println("🚫 Cannot build settlement (resources or bank limit).");
+            return;
+        }
+
+        if (currentPlayerDiceRolls == 0) {
             return;
         }
 
@@ -154,6 +175,72 @@ public class GameController {
         boardView.setCurrentPlayer(currentPlayer);
         boardView.setOnVertexClickHandler(this::handleVertexClick);
         boardView.setOnRoadClickHandler(this::handleEdgeClick);
+        boardView.setOnRollDice(this::rollDice);
+        boardView.setOnEndTurn(this::nextPlayer);
     }
+
+    private void nextPlayer() {
+        if (currentPlayer.getVictoryPoints() >= 5) {
+            String winnerColor = colorToString(currentPlayer.getColor());
+
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("🎉 Victory!");
+            alert.setHeaderText("🏆 " + winnerColor + " wins the game!");
+            alert.setContentText("Congratulations to player " + winnerColor + " for reaching 5 victory points!");
+            alert.showAndWait();
+
+        }
+        currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+        currentPlayer = players.get(currentPlayerIndex);
+        currentPlayerDiceRolls = 0;
+        boardView.setCurrentPlayer(currentPlayer);
+        boardView.updateResourceDisplay();
+        System.out.println("🔄 Turn switched to player: " + currentPlayer.getColor());
+    }
+
+    private void rollDice() {
+        if (currentPlayerDiceRolls > 0) {
+            System.out.println("Dice already rolled.");
+            return;
+        }
+
+        int result = new Dice(2).rollDice();
+        System.out.println("🎲 Dice rolled: " + result);
+
+        for (HexTile tile : board.getBoard().values()) {
+            if (tile.getDiceNumber() == result) {
+                Resources resource = tile.getResourceType();
+                Node[] nodes = tile.getHexTileNodes();
+
+                for (Node node : nodes) {
+                    int nodeId = node.getId();
+
+                    for (Player player : players) {
+                        if (player.ownsSettlementAt(nodeId)) {
+                            if (bank.takeResource(resource, 1)) {
+                                player.addResource(resource, 1);
+                                System.out.println("🌾 " + resource + " given to " + player + " at node " + nodeId);
+                            } else {
+                                System.out.println("🚫 Bank is out of " + resource + ", no resource given.");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        currentPlayerDiceRolls++;
+        Platform.runLater(() -> boardView.updateResourceDisplay());
+    }
+
+    private String colorToString(Color color) {
+        if (Color.RED.equals(color)) return "Red";
+        if (Color.BLUE.equals(color)) return "Blue";
+        if (Color.YELLOW.equals(color)) return "Yellow";
+        if (Color.WHITE.equals(color)) return "White";
+        if (Color.ORANGE.equals(color)) return "Orange";
+        return "Unknown Color";
+    }
+
 
 }
