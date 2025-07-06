@@ -4,7 +4,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.jetbrains.annotations.NotNull;
+
 
 public class CatanApplication extends Application {
     public static void main(String[] args) {
@@ -12,7 +12,7 @@ public class CatanApplication extends Application {
     }
 
     @Override
-    public void start(@NotNull Stage stage) throws Exception {
+    public void start(Stage stage) throws Exception {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("hello-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 1200, 800);
 
