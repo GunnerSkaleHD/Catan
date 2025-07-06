@@ -14,7 +14,7 @@ public class CatanApplication extends Application {
     @Override
     public void start(@NotNull Stage stage) throws Exception {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("hello-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 800, 600);
+        Scene scene = new Scene(fxmlLoader.load(), 1200, 800);
 
         stage.setTitle("Catan Board");
         stage.setScene(scene);

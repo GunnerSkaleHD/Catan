@@ -39,6 +39,8 @@ public class BoardView {
     private Button rollDiceButton;
     private Button endTurnButton;
     private Player currentPlayer;
+    private Label playerColorLabel;
+
 
     public BoardView(Pane boardPane, CatanBoard catanBoard, int[][] adjacencyMatrix) {
         this.boardPane = boardPane;
@@ -54,7 +56,7 @@ public class BoardView {
         StringBuilder sb = new StringBuilder("Resources:\n");
 
         for (Resources res : currentPlayer.getInventorySnapshot().keySet()) {
-            System.out.println("🔍 Resource key: " + res + " with amount: " + currentPlayer.getResourceCount(res));
+//            System.out.println("🔍 Resource key: " + res + " with amount: " + currentPlayer.getResourceCount(res));
             sb.append(res.name()).append(": ").append(currentPlayer.getResourceCount(res)).append("\n");
         }
 
@@ -65,48 +67,51 @@ public class BoardView {
 
     public void setCurrentPlayer(Player player) {
         this.currentPlayer = player;
-        Platform.runLater(this::updateResourceDisplay); // 👈 this delays UI update until JavaFX is ready
+
+        // 🟢 Show player's color as string
+        String colorName = convertColorToName(player.getColor());
+        Platform.runLater(() -> {
+            playerColorLabel.setText("Current Player: " + colorName);
+            updateResourceDisplay();
+        });
     }
+    private String convertColorToName(Color color) {
+        if (color.equals(Color.RED)) return "Red";
+        if (color.equals(Color.BLUE)) return "Blue";
+        if (color.equals(Color.WHITE)) return "White";
+        if (color.equals(Color.YELLOW)) return "Yellow";
+        return "Unknown";
+    }
+
+
 
 
     private void createPlayerUI() {
         resourceLabel = new Label("Resources:");
-        resourceLabel.setWrapText(true);              // ✅ Allow multiple lines
-        resourceLabel.setMaxWidth(120);               // ✅ Limit width to force wrapping
+        resourceLabel.setWrapText(true);
+        resourceLabel.setMaxWidth(120);
+
+        playerColorLabel = new Label("Current Player: ");
+        playerColorLabel.setWrapText(true);
+        playerColorLabel.setMaxWidth(120);
 
         rollDiceButton = new Button("🎲 Roll Dice");
         endTurnButton = new Button("➡ End Turn");
 
-        // Optional: Add button actions here or expose them via handlers
-        rollDiceButton.setOnAction(e -> {
-            System.out.println("Dice rolled.");
-            // Hook dice roll logic here
-        });
-
-        endTurnButton.setOnAction(e -> {
-            System.out.println("Turn ended.");
-            // Hook end turn logic here
-        });
-
-        playerUIBox = new VBox(10, resourceLabel, rollDiceButton, endTurnButton);
+        playerUIBox = new VBox(10, playerColorLabel, resourceLabel, rollDiceButton, endTurnButton);
         playerUIBox.setStyle("-fx-background-color: rgba(255,255,255,0.9); -fx-padding: 10; -fx-border-color: gray;");
         playerUIBox.setAlignment(Pos.CENTER);
-//        playerUIBox.setLayoutX(boardPane.getWidth() - 160);
-//        playerUIBox.setLayoutY(boardPane.getHeight() - 120);
         playerUIBox.setLayoutX(10);
         playerUIBox.setLayoutY(10);
 
-
         boardPane.getChildren().add(playerUIBox);
-        boardPane.requestLayout();
 
-
-        // Adjust position on resize
         boardPane.widthProperty().addListener((obs, oldVal, newVal) ->
                 playerUIBox.setLayoutX(newVal.doubleValue() - 160));
         boardPane.heightProperty().addListener((obs, oldVal, newVal) ->
                 playerUIBox.setLayoutY(newVal.doubleValue() - 120));
     }
+
 
 
     public void hideVertexByNodeId(int nodeId) {
@@ -116,6 +121,16 @@ public class BoardView {
             circle.setDisable(true);  // Prevents click interaction (optional if hidden)
         }
     }
+
+    public void setOnEndTurn(Runnable action) {
+        endTurnButton.setOnAction(e -> action.run());
+    }
+
+    public void setOnRollDice(Runnable handler) {
+        rollDiceButton.setOnAction(e -> handler.run());
+    }
+
+
 
 
     private void generateGhostRoadsFromAdjacencyMatrix() {

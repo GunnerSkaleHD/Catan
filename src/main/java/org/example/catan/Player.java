@@ -2,6 +2,7 @@ package org.example.catan;
 
 import javafx.scene.paint.Color;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @Getter
+@ToString
 public class Player {
 
     private static final int MAX_SETTLEMENTS = 5;

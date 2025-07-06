@@ -39,7 +39,7 @@ public class Bank {
         return false;
     }
 
-    public boolean useRoad() {
+    public boolean useStreet() {
         if (remainingRoads > 0) {
             remainingRoads--;
             return true;
