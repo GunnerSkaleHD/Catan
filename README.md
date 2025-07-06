@@ -4,7 +4,7 @@ Welcome to the **Catan** project! This repository contains the source code and r
 
 ## Features
 
-- Multiplayer support
+- Local Multiplayer support
 - Resource management
 - Trading system
 - Modular board setup
