@@ -1,11 +1,5 @@
 package org.example.catan;
 
-// ✅ HIER kommen die Imports hin:
-import org.example.catan.Trade;
-import org.example.catan.TradeManager;
-import org.example.catan.Resources;
-import org.example.catan.Player;
-
 import java.util.List;
 
 public class TradeController {
@@ -17,12 +11,13 @@ public class TradeController {
         this.tradeManager = tradeManager;
     }
 
-    public void submitTrade(Player from, Player to, String offerRes, int offerAmt, String wantRes, int wantAmt) {
-        if (from.getResourceCount(Resources.valueOf(offerRes)) >= offerAmt) {
-            Trade trade = new Trade(from, offerRes, offerAmt, wantRes, wantAmt, to);
-            tradeManager.addTrade(trade);
-        }
+    public void submitTrade(Player from, Player to, Resources offerRes, int offerAmt, Resources wantRes, int wantAmt) {
+    if (from.getResourceCount(offerRes) >= offerAmt) {
+        Trade trade = new Trade(from, to, offerRes, offerAmt, wantRes, wantAmt);
+        tradeManager.addTrade(trade);
     }
+}
+
 
     public List<Trade> getOpenTrades() {
         return tradeManager.getActiveTrades();

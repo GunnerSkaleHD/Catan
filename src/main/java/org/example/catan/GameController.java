@@ -1,5 +1,15 @@
 package org.example.catan;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.example.catan.Graph.HexTile;
+import org.example.catan.Graph.Node;
+
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -8,18 +18,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
-import org.example.catan.Graph.HexTile;
-import org.example.catan.Graph.Node;
-import org.example.catan.TradeManager;
-
-
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class GameController {
 
@@ -96,9 +94,8 @@ public class GameController {
             boardView.setOnEndTurn(this::nextPlayer);
             boardView.setOnRollDice(this::rollDice);
             boardView.setOnTradeWithBank(() -> new TradeDialog(currentPlayer, bank, boardView));
-            boardView.setOnTradeWithPlayer(() -> new PlayerTradeDialog(currentPlayer, players, boardView, tradeManager));
+            boardView.setOnTradeWithPlayer(() -> new PlayerTradeDialog(currentPlayer, players));
         };
-
 
         boardPane.widthProperty().addListener(sizeListener);
         boardPane.heightProperty().addListener(sizeListener);
@@ -193,9 +190,6 @@ public class GameController {
     }
 
     private void nextPlayer() {
-        if (currentPlayer.equals(startingPlayer)) {
-            tradeManager.clearTradesByPlayer(currentPlayer);
-        }
 
         if (currentPlayer.getVictoryPoints() >= 5) {
             String winnerColor = colorToString(currentPlayer.getColor());
