@@ -1,5 +1,15 @@
 package org.example.catan;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+
+import org.example.catan.Graph.HexTile;
+import org.example.catan.Graph.IntTupel;
+import org.example.catan.Graph.Node;
+
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -11,15 +21,6 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
-import org.example.catan.Graph.HexTile;
-import org.example.catan.Graph.IntTupel;
-import org.example.catan.Graph.Node;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
 
 
 public class BoardView {
@@ -40,6 +41,10 @@ public class BoardView {
     private Button endTurnButton;
     private Player currentPlayer;
     private Label playerColorLabel;
+    private Button tradeWithBankButton;
+    private Button tradeWithPlayerButton;
+    private Runnable tradeWithBankHandler;
+    private Runnable tradeWithPlayerHandler;
 
 
     public BoardView(Pane boardPane, CatanBoard catanBoard, int[][] adjacencyMatrix) {
@@ -98,7 +103,25 @@ public class BoardView {
         rollDiceButton = new Button("🎲 Roll Dice");
         endTurnButton = new Button("➡ End Turn");
 
-        playerUIBox = new VBox(10, playerColorLabel, resourceLabel, rollDiceButton, endTurnButton);
+        tradeWithBankButton = new Button("🏦 Trade with Bank");
+        tradeWithPlayerButton = new Button("🔄 Trade with Player");
+
+        tradeWithBankButton.setOnAction(e -> {
+            if (tradeWithBankHandler != null) tradeWithBankHandler.run();
+        });
+
+        tradeWithPlayerButton.setOnAction(e -> {
+            if (tradeWithPlayerHandler != null) tradeWithPlayerHandler.run();
+        });
+
+        playerUIBox = new VBox(10,
+            playerColorLabel,
+            resourceLabel,
+            rollDiceButton,
+            endTurnButton,
+            tradeWithBankButton,
+            tradeWithPlayerButton
+        );
         playerUIBox.setStyle("-fx-background-color: rgba(255,255,255,0.9); -fx-padding: 10; -fx-border-color: gray;");
         playerUIBox.setAlignment(Pos.CENTER);
         playerUIBox.setLayoutX(10);
@@ -359,5 +382,15 @@ public class BoardView {
     public void setOnRoadClickHandler(Consumer<Line> callback) {
         this.onRoadClickCallback = callback;
     }
+
+    public void setOnTradeWithBank(Runnable handler) {
+    this.tradeWithBankHandler = handler;
+    }
+
+    public void setOnTradeWithPlayer(Runnable handler) {
+        this.tradeWithPlayerHandler = handler;
+    }
+
+
 
 }

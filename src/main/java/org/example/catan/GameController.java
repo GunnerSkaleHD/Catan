@@ -10,10 +10,15 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import org.example.catan.Graph.HexTile;
 import org.example.catan.Graph.Node;
+import org.example.catan.TradeManager;
+
+
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class GameController {
@@ -25,10 +30,15 @@ public class GameController {
     private Pane boardPane;
     private BoardView boardView;
     private Player currentPlayer;
+    private Player startingPlayer;
     private int[][] adjacencyMatrix;
     private int currentPlayerIndex;
     private int currentPlayerDiceRolls;
     private Bank bank;
+
+    private Map<Player, List<Trade>> tradeBuffer = new HashMap<>();
+    private TradeManager tradeManager = new TradeManager();
+
 
     private boolean canBuildStreet(Player player) {
         return player.getResourceCount(Resources.WOOD) >= 1 &&
@@ -56,6 +66,7 @@ public class GameController {
         players.add(new Player(Color.WHITE));
 
         currentPlayer = players.getFirst();
+        startingPlayer = currentPlayer; 
 
         board = new CatanBoard(3);
         adjacencyMatrix = new int[54][54];
@@ -84,6 +95,8 @@ public class GameController {
             boardView.setOnRoadClickHandler(this::handleEdgeClick);
             boardView.setOnEndTurn(this::nextPlayer);
             boardView.setOnRollDice(this::rollDice);
+            boardView.setOnTradeWithBank(() -> new TradeDialog(currentPlayer, bank, boardView));
+            boardView.setOnTradeWithPlayer(() -> new PlayerTradeDialog(currentPlayer, players, boardView, tradeManager));
         };
 
 
@@ -180,6 +193,10 @@ public class GameController {
     }
 
     private void nextPlayer() {
+        if (currentPlayer.equals(startingPlayer)) {
+            tradeManager.clearTradesByPlayer(currentPlayer);
+        }
+
         if (currentPlayer.getVictoryPoints() >= 5) {
             String winnerColor = colorToString(currentPlayer.getColor());
 
