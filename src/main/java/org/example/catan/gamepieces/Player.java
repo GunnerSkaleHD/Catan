@@ -1,8 +1,10 @@
-package org.example.catan;
+package org.example.catan.gamepieces;
 
 import javafx.scene.paint.Color;
 import lombok.Getter;
 import lombok.ToString;
+import org.example.catan.buildings.BuildingPlacement;
+import org.example.catan.buildings.Buildings;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -123,4 +125,13 @@ public class Player {
                 .anyMatch(b -> b.type() == Buildings.STREET &&
                         ((b.nodeA() == nodeA && b.nodeB() == nodeB) || (b.nodeA() == nodeB && b.nodeB() == nodeA)));
     }
+    public String getName() {
+        if (color.equals(Color.RED)) return "Red";
+        if (color.equals(Color.BLUE)) return "Blue";
+        if (color.equals(Color.YELLOW)) return "Yellow";
+        if (color.equals(Color.WHITE)) return "White";
+        return "Unknown";
+    }
+
+
 }

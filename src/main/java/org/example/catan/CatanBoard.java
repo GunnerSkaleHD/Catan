@@ -1,26 +1,18 @@
 package org.example.catan;
 
 import lombok.Getter;
-import org.example.catan.Graph.Directions;
-import org.example.catan.Graph.HexTile;
-import org.example.catan.Graph.IntTupel;
-import org.example.catan.Graph.Node;
+import org.example.catan.gamepieces.Resources;
+import org.example.catan.graph.Directions;
+import org.example.catan.graph.HexTile;
+import org.example.catan.graph.IntTupel;
+import org.example.catan.graph.Node;
 
 import java.util.*;
 
-
-//resourcen zuordnen - check
-//zahlen chips
-
-//trigger board funktion um erwürfeltes hexfeld auszuführen
-// map: würfelzahl -> arrayList<hexagon> shoutout an LL
-
-//alg für längste handelsstraße
-
-//methoden um zu bauen (siedlung, stadt, straße)
-
-//attribut für hexagons blocked - boolean - check
-
+/**
+ * Represents the game board for Settlers of Catan.
+ * Manages the hex tiles, nodes (vertices), and streets (edges) that form the playable area.
+ */
 @Getter
 public class CatanBoard {
     private static final int STREET = 0;
@@ -29,68 +21,61 @@ public class CatanBoard {
     IntTupel[] hex_coords;
     Map<IntTupel, HexTile> board = new HashMap<>();
     int[][][] graph;
+
     /**
-     * Konstruktor: Initialisiert das CatanBoard mit dem gegebenen Radius.
-     * Ruft dabei die Methoden initNodes, initGraph, initHexCoords und createGraph auf.
+     * Constructs a new CatanBoard with the given radius.
+     * Initializes the nodes, graph, hex tile coordinates, and the full board graph.
      *
-     * @param radius Radius des Spielfelds in Hex-Ringen
+     * @param radius Number of hex rings from the center outward.
      */
     public CatanBoard(int radius) {
         initNodes(radius);
         initGraph();
         initHexCoords(radius);
-        createGraph(radius);
+        createGraph();
     }
 
     /**
-     * Rekursive Berechnung der Gesamtzahl der benötigten Knoten (Nodes)
-     * für einen gegebenen Radius n.
+     * Recursively calculates the number of nodes required for a hexagonal grid of radius n.
      *
-     * @param n Radius des Spielfelds (Anzahl der Hex-Ringe inklusive Zentrum)
-     * @return Gesamtzahl der Nodes für diesen Radius
+     * @param n The radius of the board.
+     * @return The total number of nodes.
      */
     private static int calcNumNodes(int n) {
-        if (n <= 0) {
-            return 0;
-        }
+        if (n <= 0) return 0;
         return calcNumNodes(n - 1) + (2 * n - 1) * 6;
     }
 
     /**
-     * Initialisiert das statische Node-Array mit der Anzahl aller Nodes für den
-     * angegebenen Radius. Jeder Node erhält eine eindeutige ID.
+     * Initializes the static array of nodes.
      *
-     * @param n Radius des Spielfelds (Anzahl der Hex-Ringe inklusive Zentrum)
+     * @param n The radius of the board.
      */
     public static void initNodes(int n) {
         int numNodes = calcNumNodes(n);
-        System.out.println("Anzahl Nodes: " + numNodes);
+//        System.out.println("Number of nodes: " + numNodes);
         nodes = new Node[numNodes];
         for (int i = 0; i < numNodes; i++) {
             nodes[i] = new Node(i);
-
         }
     }
 
     /**
-     * Rekursive Berechnung der Gesamtzahl der HexTiles für einen gegebenen Radius.
+     * Recursively calculates the number of hex tiles needed for a given radius.
      *
-     * @param n Radius des Spielfelds (Anzahl der Hex-Ringe)
-     * @return Anzahl aller HexTiles
+     * @param n The radius of the board.
+     * @return The number of hex tiles.
      */
     private static int calcNumHexTiles(int n) {
-        if (n == 1) {
-            return 1;
-        }
+        if (n == 1) return 1;
         return calcNumHexTiles(n - 1) + 6 * (n - 1);
     }
 
     /**
-     * Generiert eine Liste aller benötigten Ressourcen (ohne Wüste) für numTiles HexTiles.
-     * Überspringt dabei den Wert Resources.NONE und sorgt für eine gleichmäßige Verteilung.
+     * Generates the resource types for the hex tiles excluding the desert tile.
      *
-     * @param numTiles Anzahl der HexTiles (ohne Wüste), die eine Ressource benötigen
-     * @return ArrayList mit Ressourcen-Typen
+     * @param numTiles Number of resource-producing tiles.
+     * @return List of resource types.
      */
     private static ArrayList<Resources> generateResourceTypes(int numTiles) {
         ArrayList<Resources> allResources = new ArrayList<>();
@@ -100,12 +85,17 @@ public class CatanBoard {
             if (values[i % values.length] != Resources.NONE) {
                 allResources.add(values[i % values.length]);
             } else {
-                numTiles++;
+                numTiles++; // Skip desert
             }
         }
         return allResources;
     }
 
+    /**
+     * Returns a shuffled list of dice numbers used for hex tiles.
+     *
+     * @return A shuffled list of dice numbers (excluding desert).
+     */
     private static ArrayList<Integer> generateDiceNumbers() {
         ArrayList<Integer> diceNumbers = new ArrayList<>(Arrays.asList(
                 2, 3, 3, 4, 4, 5, 5, 6, 6,
@@ -116,17 +106,8 @@ public class CatanBoard {
         return diceNumbers;
     }
 
-    public void test(int x, int y) {
-        IntTupel key = new IntTupel(x, y);
-        HexTile tile = board.get(key);
-        System.out.println(tile);
-    }
-
     /**
-     * Initialisiert den Straßen-Graphen ohne vorhandene Straßen.
-     * Setzt für jedes Paar (i,j):
-     * graph[i][j][STREET]  = 0 (keine Straße)
-     * graph[i][j][PLAYER]  = -1 (kein Besitzer)
+     * Initializes the street graph with no existing roads and no ownership.
      */
     private void initGraph() {
         graph = new int[nodes.length][nodes.length][2];
@@ -139,14 +120,12 @@ public class CatanBoard {
     }
 
     /**
-     * Aktualisiert den Graphen, um das Vorhandensein einer Straße und die Spielerzugehörigkeit
-     * zwischen zwei Knoten (i und j) zu setzen oder zu entfernen. Die Operation wird in beide
-     * Richtungen durchgeführt, da der Graph ungerichtet ist.
+     * Updates the street connection between two nodes and assigns it to a player.
      *
-     * @param i        ID des ersten Knotens
-     * @param j        ID des zweiten Knotens
-     * @param existenz 1 = Straße vorhanden, 0 = keine Straße
-     * @param spieler  Index des Spielers, dem die Straße gehört, oder -1, wenn frei
+     * @param i        Node ID 1
+     * @param j        Node ID 2
+     * @param existenz 1 if road exists, 0 otherwise
+     * @param spieler  ID of owning player, -1 if none
      */
     public void updateGraph(int i, int j, int existenz, int spieler) {
         graph[i][j][STREET] = existenz;
@@ -156,10 +135,9 @@ public class CatanBoard {
     }
 
     /**
-     * Berechnet alle axialen Koordinaten (q,r) für HexTiles innerhalb des gegebenen Radius
-     * und füllt das Array hex_coords. Gültige Koordinaten erfüllen |q + r| < radius.
+     * Initializes axial coordinates for all hex tiles based on the board radius.
      *
-     * @param radius Radius des Spielfelds in Hex-Ringen
+     * @param radius Radius of the board.
      */
     private void initHexCoords(int radius) {
         hex_coords = new IntTupel[calcNumHexTiles(radius)];
@@ -175,19 +153,11 @@ public class CatanBoard {
     }
 
     /**
-     * Erzeugt alle HexTiles auf dem Spielfeld und verteilt dabei zufällig die Ressourcentypen.
-     * Verbindet außerdem die zugehörigen Knoten (Nodes) im Straßen-Graphen.
-     * <p>
-     * Vorgehen:
-     * 1. Erzeuge eine Liste aller benötigten Ressourcen (ohne Wüste) und füge dann eine Wüste hinzu.
-     * 2. Für jede Koordinate in hex_coords:
-     * a) Lege vorhandene Eckknoten anhand von Nachbar-HexTiles fest.
-     * b) Weise allen noch leeren Eckknoten einen freien Node zu und verbinde benachbarte Knoten im Graphen.
-     * c) Wähle zufällig eine Ressource aus und erstelle das HexTile.
+     * Creates all hex tiles and connects their corner nodes in the graph.
+     * Randomly assigns resources and dice numbers.
      *
-     * @param radius Radius des Spielfelds (wird nicht aktiv in dieser Methode verwendet)
      */
-    private void createGraph(int radius) {
+    private void createGraph() {
         int index = 0;
         Directions[] DIR = {
                 Directions.NORTH_WEST,
@@ -197,9 +167,9 @@ public class CatanBoard {
 
         ArrayList<Resources> allResources = generateResourceTypes(hex_coords.length - 1);
         ArrayList<Integer> allDiceNumbers = generateDiceNumbers();
-        allResources.add(Resources.NONE);
+        allResources.add(Resources.NONE); // Add desert
+
         Random rand = new Random();
-        System.out.println("Alle Ressourcen: " + allResources);
 
         for (IntTupel coords : hex_coords) {
             Node[] HexNodes = new Node[6];
@@ -241,35 +211,12 @@ public class CatanBoard {
 
             int randomIndex = rand.nextInt(allResources.size());
             Resources selectedResource = allResources.get(randomIndex);
-            int diceNumber;
-
-            if (selectedResource.equals(Resources.NONE)) {
-                diceNumber = 0; // desert, no dice number
-            } else {
-                diceNumber = allDiceNumbers.remove(0); // always take first available
-            }
+            int diceNumber = selectedResource.equals(Resources.NONE) ? 0 : allDiceNumbers.removeFirst();
 
             board.put(coords, new HexTile(diceNumber, selectedResource, HexNodes));
             allResources.remove(randomIndex);
-
         }
 
-        System.out.println("Graph created");
-        System.out.println("Anzahl Knoten: " + index);
-        for (IntTupel coords : hex_coords) {
-            System.out.println("Hexagon " + coords.q() + "," + coords.r() + ": " + board.get(coords).getAllHexTileNodes());
-        }
-        for (int i = 0; i < graph.length; i++) {
-            for (int j = 0; j < graph[i].length; j++) {
-                System.out.print(graph[i][j][STREET] + ", ");
-            }
-            System.out.println();
-        }
     }
-
-    public boolean availableStreet(int x, int y) {
-        return graph[x][y][STREET] == 1;
-    }
-
 
 }

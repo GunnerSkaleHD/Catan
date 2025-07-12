@@ -1,4 +1,4 @@
-package org.example.catan;
+package org.example.catan.gamepieces;
 
 import java.util.Random;
 

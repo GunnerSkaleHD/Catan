@@ -8,18 +8,18 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
-import org.example.catan.Graph.HexTile;
-import org.example.catan.Graph.Node;
+import org.example.catan.gamepieces.*;
+import org.example.catan.graph.HexTile;
+import org.example.catan.graph.IntTupel;
+import org.example.catan.graph.Node;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class GameController {
 
     private final Set<Integer> blockedNodes = new HashSet<>();
     private final List<Player> players = new ArrayList<>();
+    private final List<TradeOffer> activeTrades = new ArrayList<>();
     private CatanBoard board;  // assumes 3 is the correct config/depth
     @FXML
     private Pane boardPane;
@@ -29,18 +29,18 @@ public class GameController {
     private int currentPlayerIndex;
     private int currentPlayerDiceRolls;
     private Bank bank;
+    private boolean waitingForBandit = false;
 
-    private boolean canBuildStreet(Player player) {
-        return player.getResourceCount(Resources.WOOD) >= 1 &&
-                player.getResourceCount(Resources.BRICK) >= 1;
-    }
 
-    private boolean canBuildSettlement(Player player) {
-        return player.getResourceCount(Resources.WOOD) >= 1 &&
-                player.getResourceCount(Resources.BRICK) >= 1 &&
-                player.getResourceCount(Resources.WHEAT) >= 1 &&
-                player.getResourceCount(Resources.SHEEP) >= 1;
-
+    private void setupBoardView() {
+        this.boardView = new BoardView(boardPane, board, adjacencyMatrix);
+        boardView.setCurrentPlayer(currentPlayer);
+        boardView.setOnVertexClickHandler(this::handleVertexClick);
+        boardView.setOnRoadClickHandler(this::handleEdgeClick);
+        boardView.setOnRollDice(this::rollDice);
+        boardView.setOnEndTurn(this::nextPlayer);
+        boardView.setOnTradeOfferSubmitted(this::handleTradeOffer);
+        Platform.runLater(() -> boardView.placeInitialBandit(board));
     }
 
 
@@ -66,8 +66,6 @@ public class GameController {
         }
 
         setupBoardView();
-//        boardView.setOnEndTurn(this::nextPlayer);
-//        boardView.setOnRollDice(this::rollDice);
 
 
         Platform.runLater(() -> {
@@ -75,7 +73,6 @@ public class GameController {
         });
 
 
-        // Add resize listeners for dynamic board scaling
         ChangeListener<Number> sizeListener = (obs, oldVal, newVal) -> {
             boardPane.getChildren().clear();
             this.boardView = new BoardView(boardPane, board, adjacencyMatrix);
@@ -84,6 +81,8 @@ public class GameController {
             boardView.setOnRoadClickHandler(this::handleEdgeClick);
             boardView.setOnEndTurn(this::nextPlayer);
             boardView.setOnRollDice(this::rollDice);
+            boardView.setOnTradeOfferSubmitted(this::handleTradeOffer);
+            updateTradeViewerUI(); // ✅ Re-render any active trades
         };
 
 
@@ -97,16 +96,140 @@ public class GameController {
 
     }
 
+    private void removeExpiredTrades(Player player) {
+        activeTrades.removeIf(offer -> offer.getSender().equals(player));
+    }
+
+
+    private void handleTradeOffer(TradeOffer offer) {
+        if (currentPlayerDiceRolls == 0) {
+            showAlert("You must roll the dice before interacting with anything else.");
+            return;
+        }
+        if (waitingForBandit) {
+            showAlert("Please place the bandit before continuing.");
+            return;
+        }
+        if (offer.isBankTrade()) {
+            handleBankTrade(offer);
+        } else {
+            activeTrades.add(offer);
+            updateTradeViewerUI();
+        }
+    }
+
+    private void handleBankTrade(TradeOffer offer) {
+        Player player = offer.getSender();
+
+        Map<Resources, Integer> offerMap = offer.getOffer();
+        Map<Resources, Integer> wantMap = offer.getRequest();
+
+        Resources giveRes = offerMap.keySet().iterator().next();
+        int giveAmt = offerMap.get(giveRes);
+
+        Resources wantRes = wantMap.keySet().iterator().next();
+
+        if (giveAmt != 4) {
+            showAlert("Bank trades require giving exactly 4 of one resource.");
+            return;
+        }
+
+        if (!player.removeResource(giveRes, giveAmt)) {
+            showAlert("You don't have enough resources for this bank trade.");
+            return;
+        }
+
+        player.addResource(wantRes, 1);
+        boardView.updateResourceDisplay();
+        showAlert("✅ Trade with bank successful.");
+    }
+
+
+    private void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Notice");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void updateTradeViewerUI() {
+        boardView.showActiveTrades(activeTrades, this::acceptTradeOffer);
+    }
+
+    private void acceptTradeOffer(TradeOffer offer) {
+        Player receiver = currentPlayer;
+        Player sender = offer.getSender();
+
+        Resources giveRes = offer.getOffer().keySet().iterator().next();
+        int giveAmt = offer.getOffer().get(giveRes);
+
+        Resources wantRes = offer.getRequest().keySet().iterator().next();
+        int wantAmt = offer.getRequest().get(wantRes);
+
+        if (waitingForBandit) {
+            showAlert("Please place the bandit before continuing.");
+            return;
+        }
+        if (currentPlayerDiceRolls == 0) {
+            showAlert("You must roll the dice before interacting with anything else.");
+            return;
+        }
+        if (!receiver.removeResource(wantRes, wantAmt)) {
+            showAlert("❌ You don't have enough resources to accept this trade.");
+            return;
+        }
+
+        if (!sender.removeResource(giveRes, giveAmt)) {
+            showAlert("❌ Sender doesn't have enough resources anymore.");
+            receiver.addResource(wantRes, wantAmt); // rollback
+            return;
+        }
+
+
+        receiver.addResource(giveRes, giveAmt);
+        sender.addResource(wantRes, wantAmt);
+
+        offer.accept(receiver);
+        activeTrades.remove(offer);
+
+        boardView.updateResourceDisplay();
+        updateTradeViewerUI();
+        showAlert("✅ Trade accepted.");
+    }
+
+
+    private boolean canBuildStreet(Player player) {
+        return player.getResourceCount(Resources.WOOD) >= 1 &&
+                player.getResourceCount(Resources.BRICK) >= 1;
+    }
+
+    private boolean canBuildSettlement(Player player) {
+        return player.getResourceCount(Resources.WOOD) >= 1 &&
+                player.getResourceCount(Resources.BRICK) >= 1 &&
+                player.getResourceCount(Resources.WHEAT) >= 1 &&
+                player.getResourceCount(Resources.SHEEP) >= 1;
+
+    }
+
 
     private void handleEdgeClick(Line ghostLine) {
         int[] nodes = (int[]) ghostLine.getUserData();
+        if (waitingForBandit) {
+            showAlert("Please place the bandit before continuing.");
+            return;
+        }
+
+
         if (nodes == null || nodes.length != 2) {
             System.out.println("❌ Invalid edge click data.");
             return;
         }
         if (currentPlayerDiceRolls == 0) {
+            showAlert("You must roll the dice before interacting with anything else.");
             return;
         }
+
 
         if (!canBuildStreet(currentPlayer) || !bank.useStreet()) {
             System.out.println("🚫 Cannot build street (resources or bank limit).");
@@ -130,14 +253,20 @@ public class GameController {
     private void handleVertexClick(Circle clickedVertex) {
         Node node = (Node) clickedVertex.getUserData();
         int nodeId = node.getId();
+        if (waitingForBandit) {
+            showAlert("Please place the bandit before continuing.");
+            return;
+        }
         if (!canBuildSettlement(currentPlayer) || !bank.useSettlement()) {
             System.out.println("🚫 Cannot build settlement (resources or bank limit).");
             return;
         }
 
         if (currentPlayerDiceRolls == 0) {
+            showAlert("You must roll the dice before interacting with anything else.");
             return;
         }
+
 
         // Prevent placing if node is blocked
         if (blockedNodes.contains(nodeId)) {
@@ -170,14 +299,6 @@ public class GameController {
         Platform.runLater(() -> boardView.updateResourceDisplay());
     }
 
-    private void setupBoardView() {
-        this.boardView = new BoardView(boardPane, board, adjacencyMatrix);
-        boardView.setCurrentPlayer(currentPlayer);
-        boardView.setOnVertexClickHandler(this::handleVertexClick);
-        boardView.setOnRoadClickHandler(this::handleEdgeClick);
-        boardView.setOnRollDice(this::rollDice);
-        boardView.setOnEndTurn(this::nextPlayer);
-    }
 
     private void nextPlayer() {
         if (currentPlayer.getVictoryPoints() >= 5) {
@@ -190,9 +311,19 @@ public class GameController {
             alert.showAndWait();
 
         }
+        if (currentPlayerDiceRolls == 0) {
+            showAlert("Please roll the dice before ending your turn.");
+            return;
+        }
+        if (waitingForBandit) {
+            showAlert("Please place the bandit before continuing.");
+            return;
+        }
         currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
         currentPlayer = players.get(currentPlayerIndex);
         currentPlayerDiceRolls = 0;
+        removeExpiredTrades(currentPlayer);
+        updateTradeViewerUI();
         boardView.setCurrentPlayer(currentPlayer);
         boardView.updateResourceDisplay();
         System.out.println("🔄 Turn switched to player: " + currentPlayer.getColor());
@@ -203,12 +334,26 @@ public class GameController {
             System.out.println("Dice already rolled.");
             return;
         }
+        if (waitingForBandit) {
+            showAlert("Please place the bandit before continuing.");
+            return;
+        }
 
         int result = new Dice(2).rollDice();
         System.out.println("🎲 Dice rolled: " + result);
 
+        if (result == 7) {
+            System.out.println("🕵️ 7 rolled – bandit placement triggered.");
+            waitingForBandit = true;
+
+            boardView.promptBanditPlacement(board);
+            boardView.setOnBanditPlaced(this::handleBanditPlaced);
+            return; // ⛔ Skip normal distribution logic
+        }
+
+        // 🧠 Only distribute if not blocked
         for (HexTile tile : board.getBoard().values()) {
-            if (tile.getDiceNumber() == result) {
+            if (tile.getDiceNumber() == result && !tile.isBlocked()) {
                 Resources resource = tile.getResourceType();
                 Node[] nodes = tile.getHexTileNodes();
 
@@ -219,19 +364,21 @@ public class GameController {
                         if (player.ownsSettlementAt(nodeId)) {
                             if (bank.takeResource(resource, 1)) {
                                 player.addResource(resource, 1);
-                                System.out.println("🌾 " + resource + " given to " + player + " at node " + nodeId);
-                            } else {
-                                System.out.println("🚫 Bank is out of " + resource + ", no resource given.");
+                                System.out.println("🌾 " + resource + " given to " + player.getName() + " at node " + nodeId);
                             }
                         }
                     }
                 }
             }
+//            else if (tile.getDiceNumber() == result && tile.isBlocked()) {
+//                 System.out.println("🚫 Skipped tile with dice " + result + " due to bandit.");
+//            }
         }
 
         currentPlayerDiceRolls++;
         Platform.runLater(() -> boardView.updateResourceDisplay());
     }
+
 
     private String colorToString(Color color) {
         if (Color.RED.equals(color)) return "Red";
@@ -241,6 +388,24 @@ public class GameController {
         if (Color.ORANGE.equals(color)) return "Orange";
         return "Unknown Color";
     }
+    private void handleBanditPlaced(IntTupel coord) {
+        waitingForBandit = false;
+
+        // Unblock all tiles first
+        for (HexTile tile : board.getBoard().values()) {
+            tile.setBlocked(false);
+        }
+
+        HexTile selectedTile = board.getBoard().get(coord);
+        if (selectedTile != null) {
+            selectedTile.setBlocked(true);
+            System.out.println("🚫 Bandit placed on tile at: " + coord.q() + "," + coord.r());
+        }
+
+        currentPlayerDiceRolls++; // Now allow ending turn or other actions
+        Platform.runLater(() -> boardView.updateResourceDisplay());
+    }
+
 
 
 }
