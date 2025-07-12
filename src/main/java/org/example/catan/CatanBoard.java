@@ -53,7 +53,6 @@ public class CatanBoard {
      */
     public static void initNodes(int n) {
         int numNodes = calcNumNodes(n);
-//        System.out.println("Number of nodes: " + numNodes);
         nodes = new Node[numNodes];
         for (int i = 0; i < numNodes; i++) {
             nodes[i] = new Node(i);
@@ -85,7 +84,7 @@ public class CatanBoard {
             if (values[i % values.length] != Resources.NONE) {
                 allResources.add(values[i % values.length]);
             } else {
-                numTiles++; // Skip desert
+                numTiles++;
             }
         }
         return allResources;
@@ -155,7 +154,6 @@ public class CatanBoard {
     /**
      * Creates all hex tiles and connects their corner nodes in the graph.
      * Randomly assigns resources and dice numbers.
-     *
      */
     private void createGraph() {
         int index = 0;
@@ -167,7 +165,7 @@ public class CatanBoard {
 
         ArrayList<Resources> allResources = generateResourceTypes(hex_coords.length - 1);
         ArrayList<Integer> allDiceNumbers = generateDiceNumbers();
-        allResources.add(Resources.NONE); // Add desert
+        allResources.add(Resources.NONE);
 
         Random rand = new Random();
 

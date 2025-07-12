@@ -15,14 +15,18 @@ import org.example.catan.graph.Node;
 
 import java.util.*;
 
+/**
+ * Controls the core game flow for the Catan board game, including initialization, turn logic,
+ * dice rolls, resource distribution, bandit placement, and player interaction.
+ * Coordinates between the UI (BoardView) and game logic (CatanBoard, Players, Dice).
+ */
 public class GameController {
-
+    @FXML
+    private Pane boardPane;
     private final Set<Integer> blockedNodes = new HashSet<>();
     private final List<Player> players = new ArrayList<>();
     private final List<TradeOffer> activeTrades = new ArrayList<>();
-    private CatanBoard board;  // assumes 3 is the correct config/depth
-    @FXML
-    private Pane boardPane;
+    private CatanBoard board;
     private BoardView boardView;
     private Player currentPlayer;
     private int[][] adjacencyMatrix;
@@ -30,8 +34,13 @@ public class GameController {
     private int currentPlayerDiceRolls;
     private Bank bank;
     private boolean waitingForBandit = false;
+    private int lastRolledNumber = -1;
 
 
+    /**
+     * Sets up the visual board, event handlers, and interactive elements for gameplay.
+     * Includes click handling for roads, settlements, turn transitions, and dice rolls.
+     */
     private void setupBoardView() {
         this.boardView = new BoardView(boardPane, board, adjacencyMatrix);
         boardView.setCurrentPlayer(currentPlayer);
@@ -43,7 +52,11 @@ public class GameController {
         Platform.runLater(() -> boardView.placeInitialBandit(board));
     }
 
-
+    /**
+     * Called automatically by JavaFX after FXML loading.
+     * Initializes player list, board state, and game flow.
+     * Also populates the adjacency matrix used for graph logic.
+     */
     @FXML
     public void initialize() {
         currentPlayerIndex = 0;
@@ -68,9 +81,7 @@ public class GameController {
         setupBoardView();
 
 
-        Platform.runLater(() -> {
-            boardView.setCurrentPlayer(currentPlayer);
-        });
+        Platform.runLater(() -> boardView.setCurrentPlayer(currentPlayer));
 
 
         ChangeListener<Number> sizeListener = (obs, oldVal, newVal) -> {
@@ -82,81 +93,33 @@ public class GameController {
             boardView.setOnEndTurn(this::nextPlayer);
             boardView.setOnRollDice(this::rollDice);
             boardView.setOnTradeOfferSubmitted(this::handleTradeOffer);
-            updateTradeViewerUI(); // ✅ Re-render any active trades
+            updateTradeViewerUI();
         };
 
 
         boardPane.widthProperty().addListener(sizeListener);
         boardPane.heightProperty().addListener(sizeListener);
 
-        // Initial click handler setup
-        boardView.setOnVertexClickHandler(this::handleVertexClick);
-        boardView.setOnRoadClickHandler(this::handleEdgeClick);
         boardPane.setStyle("-fx-background-color: LIGHTBLUE;");
 
     }
 
+    /**
+     * Removes trade offers from the UI and backend that are no longer valid
+     * for the given player.
+     *
+     * @param player The player whose trades should be cleared.
+     */
     private void removeExpiredTrades(Player player) {
         activeTrades.removeIf(offer -> offer.getSender().equals(player));
     }
 
-
-    private void handleTradeOffer(TradeOffer offer) {
-        if (currentPlayerDiceRolls == 0) {
-            showAlert("You must roll the dice before interacting with anything else.");
-            return;
-        }
-        if (waitingForBandit) {
-            showAlert("Please place the bandit before continuing.");
-            return;
-        }
-        if (offer.isBankTrade()) {
-            handleBankTrade(offer);
-        } else {
-            activeTrades.add(offer);
-            updateTradeViewerUI();
-        }
-    }
-
-    private void handleBankTrade(TradeOffer offer) {
-        Player player = offer.getSender();
-
-        Map<Resources, Integer> offerMap = offer.getOffer();
-        Map<Resources, Integer> wantMap = offer.getRequest();
-
-        Resources giveRes = offerMap.keySet().iterator().next();
-        int giveAmt = offerMap.get(giveRes);
-
-        Resources wantRes = wantMap.keySet().iterator().next();
-
-        if (giveAmt != 4) {
-            showAlert("Bank trades require giving exactly 4 of one resource.");
-            return;
-        }
-
-        if (!player.removeResource(giveRes, giveAmt)) {
-            showAlert("You don't have enough resources for this bank trade.");
-            return;
-        }
-
-        player.addResource(wantRes, 1);
-        boardView.updateResourceDisplay();
-        showAlert("✅ Trade with bank successful.");
-    }
-
-
-    private void showAlert(String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Notice");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
-    private void updateTradeViewerUI() {
-        boardView.showActiveTrades(activeTrades, this::acceptTradeOffer);
-    }
-
+    /**
+     * Processes the acceptance of a trade offer.
+     * Updates resources of involved players and refreshes the trade UI.
+     *
+     * @param offer The trade offer being accepted.
+     */
     private void acceptTradeOffer(TradeOffer offer) {
         Player receiver = currentPlayer;
         Player sender = offer.getSender();
@@ -176,13 +139,13 @@ public class GameController {
             return;
         }
         if (!receiver.removeResource(wantRes, wantAmt)) {
-            showAlert("❌ You don't have enough resources to accept this trade.");
+            showAlert("You don't have enough resources to accept this trade.");
             return;
         }
 
         if (!sender.removeResource(giveRes, giveAmt)) {
-            showAlert("❌ Sender doesn't have enough resources anymore.");
-            receiver.addResource(wantRes, wantAmt); // rollback
+            showAlert("Sender doesn't have enough resources anymore.");
+            receiver.addResource(wantRes, wantAmt);
             return;
         }
 
@@ -198,108 +161,71 @@ public class GameController {
         showAlert("✅ Trade accepted.");
     }
 
-
-    private boolean canBuildStreet(Player player) {
-        return player.getResourceCount(Resources.WOOD) >= 1 &&
-                player.getResourceCount(Resources.BRICK) >= 1;
+    /**
+     * Refreshes the trade UI to show all currently available offers from other players.
+     */
+    private void updateTradeViewerUI() {
+        boardView.showActiveTrades(activeTrades, this::acceptTradeOffer);
     }
 
-    private boolean canBuildSettlement(Player player) {
-        return player.getResourceCount(Resources.WOOD) >= 1 &&
-                player.getResourceCount(Resources.BRICK) >= 1 &&
-                player.getResourceCount(Resources.WHEAT) >= 1 &&
-                player.getResourceCount(Resources.SHEEP) >= 1;
-
-    }
-
-
-    private void handleEdgeClick(Line ghostLine) {
-        int[] nodes = (int[]) ghostLine.getUserData();
+    /**
+     * Handles rolling the dice for the current player.
+     * Prevents rolling if already rolled or if waiting for bandit placement.
+     * Rolls two dice, updates the dice display, and distributes resources.
+     * If a 7 is rolled, triggers bandit placement. Otherwise, gives resources to players with settlements on matching tiles.
+     * Increments the dice roll counter and updates the resource display.
+     */
+    private void rollDice() {
+        if (currentPlayerDiceRolls > 0) {
+            return;
+        }
         if (waitingForBandit) {
             showAlert("Please place the bandit before continuing.");
             return;
         }
 
+        int result = new Dice(2).rollDice();
 
-        if (nodes == null || nodes.length != 2) {
-            System.out.println("❌ Invalid edge click data.");
-            return;
-        }
-        if (currentPlayerDiceRolls == 0) {
-            showAlert("You must roll the dice before interacting with anything else.");
-            return;
-        }
+        lastRolledNumber = result;
+        Platform.runLater(() -> boardView.updateDiceNumber(result));
 
 
-        if (!canBuildStreet(currentPlayer) || !bank.useStreet()) {
-            System.out.println("🚫 Cannot build street (resources or bank limit).");
-            return;
-        }
+        if (result == 7) {
+            waitingForBandit = true;
 
-
-        // Try to update the model first
-        boolean placed = currentPlayer.placeStreet(nodes[0], nodes[1]);
-        if (!placed) {
-            System.out.println("❌ Street placement failed (limit reached or duplicate).");
+            boardView.promptBanditPlacement(board);
+            boardView.setOnBanditPlaced(this::handleBanditPlaced);
             return;
         }
 
-        // Visually place it
-        boardView.placeRoad(ghostLine, currentPlayer.getColor());
-        Platform.runLater(() -> boardView.updateResourceDisplay());
-    }
+        for (HexTile tile : board.getBoard().values()) {
+            if (tile.getDiceNumber() == result && !tile.isBlocked()) {
+                Resources resource = tile.getResourceType();
+                Node[] nodes = tile.getHexTileNodes();
 
+                for (Node node : nodes) {
+                    int nodeId = node.getId();
 
-    private void handleVertexClick(Circle clickedVertex) {
-        Node node = (Node) clickedVertex.getUserData();
-        int nodeId = node.getId();
-        if (waitingForBandit) {
-            showAlert("Please place the bandit before continuing.");
-            return;
-        }
-        if (!canBuildSettlement(currentPlayer) || !bank.useSettlement()) {
-            System.out.println("🚫 Cannot build settlement (resources or bank limit).");
-            return;
-        }
-
-        if (currentPlayerDiceRolls == 0) {
-            showAlert("You must roll the dice before interacting with anything else.");
-            return;
-        }
-
-
-        // Prevent placing if node is blocked
-        if (blockedNodes.contains(nodeId)) {
-            System.out.println("❌ Node " + nodeId + " is blocked.");
-            return;
-        }
-        boolean placed = currentPlayer.placeSettlement(nodeId);
-        if (!placed) {
-            System.out.println("❌ Settlement placement failed (limit reached or duplicate).");
-            return;
-        }
-
-        // ✅ Place settlement
-        boardView.placeSettlement(clickedVertex, currentPlayer.getColor());
-
-        // ✅ Block this node and its adjacent nodes
-        blockedNodes.add(nodeId);
-        boardView.hideVertexByNodeId(nodeId); // hide current
-
-        for (int i = 0; i < adjacencyMatrix[nodeId].length; i++) {
-            if (adjacencyMatrix[nodeId][i] == 1) {
-                blockedNodes.add(i);
-                boardView.hideVertexByNodeId(i); // hide adjacent
+                    for (Player player : players) {
+                        if (player.ownsSettlementAt(nodeId)) {
+                            if (bank.takeResource(resource, 1)) {
+                                player.addResource(resource, 1);
+                            }
+                        }
+                    }
+                }
             }
         }
 
-        System.out.println("✅ Settlement placed on node " + nodeId);
-
-
+        currentPlayerDiceRolls++;
         Platform.runLater(() -> boardView.updateResourceDisplay());
     }
 
-
+    /**
+     * Switches to the next player's turn in the game.
+     * Advances the index, sets the current player, updates the UI,
+     * and prompts the player to roll dice. Also cleans up expired trades.
+     */
     private void nextPlayer() {
         if (currentPlayer.getVictoryPoints() >= 5) {
             String winnerColor = colorToString(currentPlayer.getColor());
@@ -326,60 +252,171 @@ public class GameController {
         updateTradeViewerUI();
         boardView.setCurrentPlayer(currentPlayer);
         boardView.updateResourceDisplay();
-        System.out.println("🔄 Turn switched to player: " + currentPlayer.getColor());
     }
 
-    private void rollDice() {
-        if (currentPlayerDiceRolls > 0) {
-            System.out.println("Dice already rolled.");
+    /**
+     * Handles an incoming trade offer from a player.
+     * If the trade is with the bank, processes it directly.
+     * Otherwise, adds the trade offer to the list of active trades.
+     *
+     * @param offer the trade offer to be processed
+     */
+    private void handleTradeOffer(TradeOffer offer) {
+        if (currentPlayerDiceRolls == 0) {
+            showAlert("You must roll the dice before interacting with anything else.");
             return;
         }
         if (waitingForBandit) {
             showAlert("Please place the bandit before continuing.");
             return;
         }
+        if (offer.isBankTrade()) {
+            handleBankTrade(offer);
+        } else {
+            activeTrades.add(offer);
+            updateTradeViewerUI();
+        }
+    }
 
-        int result = new Dice(2).rollDice();
-        System.out.println("🎲 Dice rolled: " + result);
-
-        if (result == 7) {
-            System.out.println("🕵️ 7 rolled – bandit placement triggered.");
-            waitingForBandit = true;
-
-            boardView.promptBanditPlacement(board);
-            boardView.setOnBanditPlaced(this::handleBanditPlaced);
-            return; // ⛔ Skip normal distribution logic
+    /**
+     * Handles user interaction when clicking a ghost road (edge).
+     * Validates game state, player resources, and street placement before
+     * updating both the model and view.
+     *
+     * @param ghostLine the line representing the clicked edge
+     */
+    private void handleEdgeClick(Line ghostLine) {
+        int[] nodes = (int[]) ghostLine.getUserData();
+        if (waitingForBandit) {
+            showAlert("Please place the bandit before continuing.");
+            return;
         }
 
-        // 🧠 Only distribute if not blocked
-        for (HexTile tile : board.getBoard().values()) {
-            if (tile.getDiceNumber() == result && !tile.isBlocked()) {
-                Resources resource = tile.getResourceType();
-                Node[] nodes = tile.getHexTileNodes();
 
-                for (Node node : nodes) {
-                    int nodeId = node.getId();
+        if (nodes == null || nodes.length != 2) {
+            return;
+        }
+        if (currentPlayerDiceRolls == 0) {
+            showAlert("You must roll the dice before interacting with anything else.");
+            return;
+        }
 
-                    for (Player player : players) {
-                        if (player.ownsSettlementAt(nodeId)) {
-                            if (bank.takeResource(resource, 1)) {
-                                player.addResource(resource, 1);
-                                System.out.println("🌾 " + resource + " given to " + player.getName() + " at node " + nodeId);
-                            }
-                        }
-                    }
-                }
+
+        if (!canBuildStreet(currentPlayer) || !bank.useStreet()) {
+            return;
+        }
+
+
+        boolean placed = currentPlayer.placeStreet(nodes[0], nodes[1]);
+        if (!placed) {
+            return;
+        }
+
+        boardView.placeRoad(ghostLine, currentPlayer.getColor());
+        Platform.runLater(() -> boardView.updateResourceDisplay());
+    }
+
+    /**
+     * Handles user interaction when clicking a vertex (node) to place a settlement.
+     * Checks if placement is allowed, updates the game model and view,
+     * and blocks surrounding nodes according to Catan rules.
+     *
+     * @param clickedVertex the circle representing the clicked vertex
+     */
+    private void handleVertexClick(Circle clickedVertex) {
+        Node node = (Node) clickedVertex.getUserData();
+        int nodeId = node.getId();
+        if (waitingForBandit) {
+            showAlert("Please place the bandit before continuing.");
+            return;
+        }
+        if (!canBuildSettlement(currentPlayer) || !bank.useSettlement()) {
+            return;
+        }
+
+        if (currentPlayerDiceRolls == 0) {
+            showAlert("You must roll the dice before interacting with anything else.");
+            return;
+        }
+
+        if (blockedNodes.contains(nodeId)) {
+            return;
+        }
+        boolean placed = currentPlayer.placeSettlement(nodeId);
+        if (!placed) {
+            return;
+        }
+
+        boardView.placeSettlement(clickedVertex, currentPlayer.getColor());
+
+        blockedNodes.add(nodeId);
+        boardView.hideVertexByNodeId(nodeId);
+
+        for (int i = 0; i < adjacencyMatrix[nodeId].length; i++) {
+            if (adjacencyMatrix[nodeId][i] == 1) {
+                blockedNodes.add(i);
+                boardView.hideVertexByNodeId(i);
             }
-//            else if (tile.getDiceNumber() == result && tile.isBlocked()) {
-//                 System.out.println("🚫 Skipped tile with dice " + result + " due to bandit.");
-//            }
+        }
+        Platform.runLater(() -> boardView.updateResourceDisplay());
+    }
+
+    /**
+     * Processes a trade with the bank.
+     * Validates that the player gives exactly 4 of one resource and has enough in inventory.
+     * If valid, completes the trade by removing and adding resources accordingly.
+     *
+     * @param offer the trade offer directed at the bank
+     */
+    private void handleBankTrade(TradeOffer offer) {
+        Player player = offer.getSender();
+
+        Map<Resources, Integer> offerMap = offer.getOffer();
+        Map<Resources, Integer> wantMap = offer.getRequest();
+
+        Resources giveRes = offerMap.keySet().iterator().next();
+        int giveAmt = offerMap.get(giveRes);
+
+        Resources wantRes = wantMap.keySet().iterator().next();
+
+        if (giveAmt != 4) {
+            showAlert("Bank trades require giving exactly 4 of one resource.");
+            return;
+        }
+
+        if (!player.removeResource(giveRes, giveAmt)) {
+            showAlert("You don't have enough resources for this bank trade.");
+            return;
+        }
+
+        player.addResource(wantRes, 1);
+        boardView.updateResourceDisplay();
+        showAlert("✅ Trade with bank successful.");
+    }
+
+    /**
+     * Handles logic after the bandit is placed on a tile.
+     * Updates game model by marking the selected tile as blocked and unblocking all others.
+     *
+     * @param coord the coordinate of the tile where the bandit was placed
+     */
+    private void handleBanditPlaced(IntTupel coord) {
+        waitingForBandit = false;
+        HexTile selectedTile = board.getBoard().get(coord);
+        if (selectedTile != null) {
+            selectedTile.setBlocked(true);
         }
 
         currentPlayerDiceRolls++;
         Platform.runLater(() -> boardView.updateResourceDisplay());
     }
 
-
+    /**
+     * Converts a JavaFX Color object to a readable color name string.
+     *
+     * @param color the color to convert
+     * @return the string representation of the color
+     */
     private String colorToString(Color color) {
         if (Color.RED.equals(color)) return "Red";
         if (Color.BLUE.equals(color)) return "Blue";
@@ -388,24 +425,42 @@ public class GameController {
         if (Color.ORANGE.equals(color)) return "Orange";
         return "Unknown Color";
     }
-    private void handleBanditPlaced(IntTupel coord) {
-        waitingForBandit = false;
 
-        // Unblock all tiles first
-        for (HexTile tile : board.getBoard().values()) {
-            tile.setBlocked(false);
-        }
-
-        HexTile selectedTile = board.getBoard().get(coord);
-        if (selectedTile != null) {
-            selectedTile.setBlocked(true);
-            System.out.println("🚫 Bandit placed on tile at: " + coord.q() + "," + coord.r());
-        }
-
-        currentPlayerDiceRolls++; // Now allow ending turn or other actions
-        Platform.runLater(() -> boardView.updateResourceDisplay());
+    /**
+     * Checks if a player has enough resources to build a street.
+     *
+     * @param player the player to check
+     * @return true if the player has at least 1 wood and 1 brick, false otherwise
+     */
+    private boolean canBuildStreet(Player player) {
+        return player.getResourceCount(Resources.WOOD) >= 1 &&
+                player.getResourceCount(Resources.BRICK) >= 1;
     }
 
+    /**
+     * Checks if a player has enough resources to build a settlement.
+     *
+     * @param player the player to check
+     * @return true if the player has at least 1 wood, brick, wheat, and sheep, false otherwise
+     */
+    private boolean canBuildSettlement(Player player) {
+        return player.getResourceCount(Resources.WOOD) >= 1 &&
+                player.getResourceCount(Resources.BRICK) >= 1 &&
+                player.getResourceCount(Resources.WHEAT) >= 1 &&
+                player.getResourceCount(Resources.SHEEP) >= 1;
 
+    }
 
+    /**
+     * Displays an informational alert dialog with a given message.
+     *
+     * @param message the message to display
+     */
+    private void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Notice");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
 }
