@@ -3,8 +3,8 @@ package org.example.catan.gamepieces;
 import javafx.scene.paint.Color;
 import lombok.Getter;
 import lombok.ToString;
-import org.example.catan.buildings.BuildingPlacement;
-import org.example.catan.buildings.Buildings;
+import org.example.catan.gamepieces.buildings.BuildingPlacement;
+import org.example.catan.gamepieces.buildings.Buildings;
 
 import java.util.ArrayList;
 import java.util.EnumMap;

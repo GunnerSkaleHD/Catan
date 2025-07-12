@@ -1,4 +1,4 @@
-package org.example.catan.buildings;
+package org.example.catan.gamepieces.buildings;
 
 /**
  * Enum representing different types of buildings in the game "The Settlers of Catan".

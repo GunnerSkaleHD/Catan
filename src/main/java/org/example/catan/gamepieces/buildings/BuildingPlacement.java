@@ -1,4 +1,4 @@
-package org.example.catan.buildings;
+package org.example.catan.gamepieces.buildings;
 
 /**
  * Represents the placement of a building in the game "The Settlers of Catan".
