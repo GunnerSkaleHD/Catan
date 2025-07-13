@@ -21,11 +21,11 @@ import java.util.*;
  * Coordinates between the UI (BoardView) and game logic (CatanBoard, Players, Dice).
  */
 public class GameController {
-    @FXML
-    private Pane boardPane;
     private final Set<Integer> blockedNodes = new HashSet<>();
     private final List<Player> players = new ArrayList<>();
     private final List<TradeOffer> activeTrades = new ArrayList<>();
+    @FXML
+    private Pane boardPane;
     private CatanBoard board;
     private BoardView boardView;
     private Player currentPlayer;
@@ -172,7 +172,8 @@ public class GameController {
      * Handles rolling the dice for the current player.
      * Prevents rolling if already rolled or if waiting for bandit placement.
      * Rolls two dice, updates the dice display, and distributes resources.
-     * If a 7 is rolled, triggers bandit placement. Otherwise, gives resources to players with settlements on matching tiles.
+     * If a 7 is rolled, triggers bandit placement. Otherwise, gives resources to players with settlements on
+     * matching tiles.
      * Increments the dice roll counter and updates the resource display.
      */
     private void rollDice() {
@@ -192,7 +193,7 @@ public class GameController {
 
         if (result == 7) {
             waitingForBandit = true;
-
+            stealFromRandomPlayer(currentPlayer, players);
             boardView.promptBanditPlacement(board);
             boardView.setOnBanditPlaced(this::handleBanditPlaced);
             return;
@@ -462,5 +463,57 @@ public class GameController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    /**
+     * Steals a random resource from a random other player.
+     *
+     * This method selects a random player from the provided player list (excluding the current player),
+     * who has at least one resource card. It then steals a random resource type (that the victim actually owns)
+     * and transfers one card of that type from the victim to the current player. If no eligible victims exist,
+     * the method displays an alert and does nothing.
+     *
+     * @param playerList    The list of all players in the game.
+     * @param currentPlayer The player who is performing the steal (the one who rolled a 7).
+     */
+    private void stealFromRandomPlayer(Player currentPlayer, List<Player> playerList) {
+        List<Player> candidates = new ArrayList<>();
+        for (Player p : playerList) {
+            if (!p.equals(currentPlayer)) {
+                int total = 0;
+                for (Resources res : Resources.values()) {
+                    if (res != Resources.NONE) {
+                        total += p.getResourceCount(res);
+                    }
+                }
+                if (total > 0) {
+                    candidates.add(p);
+                }
+            }
+        }
+        if (candidates.isEmpty()) {
+            showAlert("No player has any resources to steal.");
+            return;
+        }
+
+        Player victim = candidates.get(new Random().nextInt(candidates.size()));
+
+        List<Resources> victimResources = new ArrayList<>();
+        for (Resources res : Resources.values()) {
+            if (res != Resources.NONE && victim.getResourceCount(res) > 0) {
+                victimResources.add(res);
+            }
+        }
+        if (victimResources.isEmpty()) {
+            showAlert(victim.getName() + " has no resources to steal.");
+            return;
+        }
+
+        Resources stolen = victimResources.get(new Random().nextInt(victimResources.size()));
+        victim.removeResource(stolen, 1);
+        currentPlayer.addResource(stolen, 1);
+
+        showAlert(currentPlayer.getName() + " stole 1 " + stolen.toString().toLowerCase() + " from " + victim.getName() + "!");
+        Platform.runLater(() -> boardView.updateResourceDisplay());
     }
 }
