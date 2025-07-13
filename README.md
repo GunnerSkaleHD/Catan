@@ -18,7 +18,7 @@ A modern desktop adaptation of the classic board game "The Settlers of Catan," i
 
 ### Prerequisites
 
-* **Java 17** or higher (recommended for JavaFX 17+)
+* **Java 21** or higher (recommended for JavaFX 21+)
 * **[JavaFX SDK](https://gluonhq.com/products/javafx/)** matching your Java version
 * **Maven** (for building)
 
