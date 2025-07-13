@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9ad4d4e4-26f7-440d-9ded-69545b1e7277" name="Changes" comment="Achieved Perfection: No more yellow or green warnings in Intellij">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/catan/GameController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/catan/GameController.java" afterDir="false" />
+    <list default="true" id="9ad4d4e4-26f7-440d-9ded-69545b1e7277" name="Changes" comment="Achieved beyond Perfection: Game exits when a Player wins the game">
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -162,7 +161,7 @@
       <workItem from="1752352741891" duration="276000" />
       <workItem from="1752353023623" duration="195000" />
       <workItem from="1752373957289" duration="2031000" />
-      <workItem from="1752375999733" duration="2829000" />
+      <workItem from="1752375999733" duration="3706000" />
     </task>
     <task id="LOCAL-00001" summary="Done">
       <option name="closed" value="true" />
@@ -372,7 +371,15 @@
       <option name="project" value="LOCAL" />
       <updated>1752378516409</updated>
     </task>
-    <option name="localTasksCounter" value="27" />
+    <task id="LOCAL-00027" summary="Achieved beyond Perfection: Game exits when a Player wins the game">
+      <option name="closed" value="true" />
+      <created>1752379037099</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1752379037099</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -411,7 +418,8 @@
     <MESSAGE value="Changed .gitignore" />
     <MESSAGE value="On the Verge of Perfection" />
     <MESSAGE value="Achieved Perfection: No more yellow or green warnings in Intellij" />
-    <option name="LAST_COMMIT_MESSAGE" value="Achieved Perfection: No more yellow or green warnings in Intellij" />
+    <MESSAGE value="Achieved beyond Perfection: Game exits when a Player wins the game" />
+    <option name="LAST_COMMIT_MESSAGE" value="Achieved beyond Perfection: Game exits when a Player wins the game" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
