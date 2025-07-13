@@ -4,7 +4,6 @@ import java.util.Random;
 
 /**
  * Represents a set of dice used in the game "The Settlers of Catan".
- *
  * Allows rolling a specified number of standard 6-sided dice.
  */
 public class Dice {
@@ -12,7 +11,7 @@ public class Dice {
     private final Random random;
 
     /**
-     * Constructs a Dice object with the given number of dice.
+     * Constructs a Die object with the given number of dice.
      *
      * @param amount the number of 6-sided dice to roll
      */

@@ -41,15 +41,6 @@ public class TradeOffer {
     }
 
     /**
-     * Determines if the trade offer should expire (e.g., when the sender's turn comes again).
-     * @param currentTurnPlayer The player whose turn it is now
-     * @return true if the trade offer is expired
-     */
-    public boolean isExpired(Player currentTurnPlayer) {
-        return sender.equals(currentTurnPlayer);
-    }
-
-    /**
      * Getter method to check if this is a bank trade.
      * Required for controller logic.
      */
