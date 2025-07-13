@@ -232,7 +232,8 @@ public class GameController {
             alert.setHeaderText("🏆 " + currentPlayer.getName() + " wins the game!");
             alert.setContentText("Congratulations to player " + currentPlayer.getName() + " for reaching 5 victory points!");
             alert.showAndWait();
-
+            Platform.exit();
+            return;
         }
         if (currentPlayerDiceRolls == 0) {
             showAlert("Please roll the dice before ending your turn.");
