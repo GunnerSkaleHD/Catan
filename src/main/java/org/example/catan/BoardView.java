@@ -36,7 +36,6 @@ public class BoardView {
     private final Pane boardPane;
     private final Map<Integer, Circle> nodeCircles = new HashMap<>();
     private final Map<Circle, Rectangle> placedSettlements = new HashMap<>();
-    private final List<Polygon> allTiles = new ArrayList<>();
     private final int[][] adjacencyMatrix;
     private final Map<Polygon, IntTupel> tileByPolygon = new HashMap<>();
     private final List<Circle> ghostBanditMarkers = new ArrayList<>();
@@ -60,9 +59,6 @@ public class BoardView {
     private Button offerTradeButton;
     private CheckBox bankTradeCheckbox;
     private VBox activeTradesBox;
-    @Setter
-    private Consumer<TradeOffer> onTradeOffer;
-
 
     /**
      * Constructs the game board UI and initializes player controls and rendering.
@@ -80,6 +76,67 @@ public class BoardView {
     }
 
     /**
+     * Creates a {@link Line} between the centers of two circles, with a fixed margin at each end.
+     * The resulting line starts and ends a specified distance (margin) from the centers,
+     * so it does not overlap the circles themselves.
+     *
+     * @param c1 the first {@link Circle}
+     * @param c2 the second {@link Circle}
+     * @return a {@link Line} object connecting the two circles, offset by the margin
+     */
+    private static Line getGhostRoadLine(Circle c1, Circle c2) {
+        double x1 = c1.getCenterX();
+        double y1 = c1.getCenterY();
+        double x2 = c2.getCenterX();
+        double y2 = c2.getCenterY();
+
+        double dx = x2 - x1;
+        double dy = y2 - y1;
+
+        double length = Math.sqrt(dx * dx + dy * dy);
+
+        double margin = 12;
+
+        double ux = dx / length;
+        double uy = dy / length;
+
+        double sx = x1 + ux * margin;
+        double sy = y1 + uy * margin;
+        double ex = x2 - ux * margin;
+        double ey = y2 - uy * margin;
+
+        return new Line(sx, sy, ex, ey);
+    }
+
+    /**
+     * Creates a visual trade card for displaying a trade offer in the UI.
+     * The card includes the offer description and an "Accept" button that
+     * triggers the provided callback when clicked.
+     *
+     * @param onAccept  the callback to execute when the accept button is pressed
+     * @param offer     the {@link TradeOffer} being represented by this card
+     * @param offerText a string description of the trade offer to display
+     * @return a configured {@link VBox} containing the trade offer details and accept button
+     */
+    private static VBox getTradeCardVBox(Consumer<TradeOffer> onAccept, TradeOffer offer, String offerText) {
+        Label label = new Label(offerText);
+        label.setWrapText(true);
+
+        Button acceptBtn = new Button("✅ Accept");
+        acceptBtn.setStyle("-fx-border-radius: 3; -fx-background-radius: 3;");
+        acceptBtn.setOnAction(e -> onAccept.accept(offer));
+
+        VBox tradeCard = new VBox(5, label, acceptBtn);
+        tradeCard.setStyle("""
+                    -fx-background-color: white;
+                    -fx-padding: 8;
+                    -fx-border-color: lightgray;
+                    -fx-background-radius: 4;
+                """);
+        return tradeCard;
+    }
+
+    /**
      * Loads hex tiles, dice numbers, and node vertices from the given board model and renders them.
      *
      * @param catanBoard the model of the game board to render
@@ -90,21 +147,16 @@ public class BoardView {
             IntTupel coord = entry.getKey();
             HexTile tile = entry.getValue();
 
-            double paneWidth = boardPane.getWidth();
-            double paneHeight = boardPane.getHeight();
+            double[] center = getHexCenter(coord);
+            double centerX = center[0];
+            double centerY = center[1];
 
-            double offsetX = paneWidth / 2.0;
-            double offsetY = paneHeight / 2.0;
-
-            double centerX = offsetX + HEX_SIZE * Math.sqrt(3) * (coord.q() + coord.r() / 2.0);
-            double centerY = offsetY + HEX_SIZE * 1.5 * coord.r();
 
             // Create hexagon
             Polygon hex = createHexagon(centerX, centerY);
             hex.setFill(resourceToColor(tile.getResourceType()));
             hex.setStroke(Color.BLACK);
             hex.setStrokeWidth(2);
-            allTiles.add(hex);
             boardPane.getChildren().add(hex);
             tileByPolygon.put(hex, coord);
 
@@ -130,46 +182,20 @@ public class BoardView {
             IntTupel coord = entry.getKey();
             HexTile tile = entry.getValue();
 
-            double paneWidth = boardPane.getWidth();
-            double paneHeight = boardPane.getHeight();
+            double[] center = getHexCenter(coord);
+            double centerX = center[0];
+            double centerY = center[1];
 
-            double offsetX = paneWidth / 2.0;
-            double offsetY = paneHeight / 2.0;
-
-            double centerX = offsetX + HEX_SIZE * Math.sqrt(3) * (coord.q() + coord.r() / 2.0);
-            double centerY = offsetY + HEX_SIZE * 1.5 * coord.r();
 
             for (int i = 0; i < tile.getHexTileNodes().length; i++) {
                 Node node = tile.getHexTileNodes()[i];
                 if (!nodeCircles.containsKey(node.getId())) {
-                    double angle_deg = CORNER_ANGLES_DEG[i];
-                    double angle_rad = Math.toRadians(angle_deg);
-
-                    double vx = centerX + HEX_SIZE * Math.cos(angle_rad);
-                    double vy = centerY + HEX_SIZE * Math.sin(angle_rad);
-
-                    Circle vertex = new Circle(8);
-                    vertex.setFill(Color.LIGHTGRAY.deriveColor(1, 1, 1, 0.5));
-                    vertex.setStroke(Color.GRAY);
-                    vertex.setFill(Color.LIGHTGRAY);
-                    vertex.setCenterX(vx);
-                    vertex.setCenterY(vy);
-                    vertex.setUserData(node);
-                    vertex.setOpacity(0.5);
-                    vertex.setOnMouseEntered(e -> vertex.setOpacity(0.8));
-                    vertex.setOnMouseExited(e -> vertex.setOpacity(0.5));
-
-                    vertex.setOnMouseClicked(event -> {
-                        if (onVertexClickCallback != null) {
-                            onVertexClickCallback.accept(vertex);
-                        }
-                    });
-
-
+                    Circle vertex = createVertexCircle(node, i, centerX, centerY);
                     nodeCircles.put(node.getId(), vertex);
                     boardPane.getChildren().add(vertex);
                 }
             }
+
         }
 
         for (Map.Entry<Circle, Rectangle> entry : placedSettlements.entrySet()) {
@@ -204,27 +230,7 @@ public class BoardView {
                     String key = i + "-" + j;
                     if (ghostRoads.containsKey(key)) continue;
 
-                    double x1 = c1.getCenterX();
-                    double y1 = c1.getCenterY();
-                    double x2 = c2.getCenterX();
-                    double y2 = c2.getCenterY();
-
-                    double dx = x2 - x1;
-                    double dy = y2 - y1;
-
-                    double length = Math.sqrt(dx * dx + dy * dy);
-
-                    double margin = 12;
-
-                    double ux = dx / length;
-                    double uy = dy / length;
-
-                    double sx = x1 + ux * margin;
-                    double sy = y1 + uy * margin;
-                    double ex = x2 - ux * margin;
-                    double ey = y2 - uy * margin;
-
-                    Line ghost = new Line(sx, sy, ex, ey);
+                    Line ghost = getGhostRoadLine(c1, c2);
 
                     ghost.setStroke(Color.LIGHTGRAY);
                     ghost.setStrokeWidth(10);
@@ -401,29 +407,7 @@ public class BoardView {
             if (tile == null || tile.getResourceType() == Resources.NONE) continue;
 
             double centerX = hex.getBoundsInParent().getMinX() + hex.getBoundsInParent().getWidth() / 2;
-            double centerY = hex.getBoundsInParent().getMinY() + hex.getBoundsInParent().getHeight() / 2;
-
-            Circle ghost = new Circle(centerX, centerY, 20);
-            ghost.setStroke(Color.BLACK);
-            ghost.setFill(Color.DARKGREY);
-            ghost.setOpacity(0.3);
-
-            ghost.setOnMouseEntered(e -> ghost.setOpacity(1));
-            ghost.setOnMouseExited(e -> ghost.setOpacity(0.5));
-
-            ghost.setUserData(hex);
-
-            ghost.setOnMouseClicked(e -> {
-                Polygon targetHex = (Polygon) ghost.getUserData();
-                IntTupel targetCoord = tileByPolygon.get(targetHex);
-
-                if (onBanditPlaced != null) {
-                    onBanditPlaced.accept(targetCoord);
-                }
-
-                placeBanditOnTile(centerX, centerY);
-                hideBanditGhosts();
-            });
+            Circle ghost = getGhostBanditCircle(hex, centerX);
 
             ghostBanditMarkers.add(ghost);
             boardPane.getChildren().add(ghost);
@@ -532,7 +516,6 @@ public class BoardView {
         }
     }
 
-
     /**
      * Updates the dice number display in the player UI.
      * Runs the update on the JavaFX application thread.
@@ -542,7 +525,6 @@ public class BoardView {
     public void updateDiceNumber(int number) {
         Platform.runLater(() -> diceNumberLabel.setText("Dice: " + number));
     }
-
 
     /**
      * Sets the callback for the "End Turn" button.
@@ -651,20 +633,7 @@ public class BoardView {
                     offer.getRequest().entrySet().iterator().next().getValue() + " " +
                     offer.getRequest().keySet().iterator().next().name();
 
-            Label label = new Label(offerText);
-            label.setWrapText(true);
-
-            Button acceptBtn = new Button("✅ Accept");
-            acceptBtn.setStyle("-fx-border-radius: 3; -fx-background-radius: 3;");
-            acceptBtn.setOnAction(e -> onAccept.accept(offer));
-
-            VBox tradeCard = new VBox(5, label, acceptBtn);
-            tradeCard.setStyle("""
-                        -fx-background-color: white;
-                        -fx-padding: 8;
-                        -fx-border-color: lightgray;
-                        -fx-background-radius: 4;
-                    """);
+            VBox tradeCard = getTradeCardVBox(onAccept, offer, offerText);
 
             activeTradesBox.getChildren().add(tradeCard);
         }
@@ -721,4 +690,96 @@ public class BoardView {
             case NONE -> Color.BLACK;
         };
     }
+
+    /**
+     * Calculates the pixel coordinates for the center of a hex tile on the game board,
+     * based on its axial coordinates.
+     *
+     * @param coord the {@link IntTupel} axial coordinate (q, r) of the hex tile
+     * @return a double array containing the x and y pixel coordinates: [centerX, centerY]
+     */
+    private double[] getHexCenter(IntTupel coord) {
+        double paneWidth = boardPane.getWidth();
+        double paneHeight = boardPane.getHeight();
+        double offsetX = paneWidth / 2.0;
+        double offsetY = paneHeight / 2.0;
+        double centerX = offsetX + HEX_SIZE * Math.sqrt(3) * (coord.q() + coord.r() / 2.0);
+        double centerY = offsetY + HEX_SIZE * 1.5 * coord.r();
+        return new double[]{centerX, centerY};
+    }
+
+    /**
+     * Creates and returns a Circle representing a vertex (node) at a given angle and center, and attaches mouse
+     * listeners.
+     *
+     * @param node       The logical node to represent.
+     * @param angleIndex The index for angle calculation.
+     * @param centerX    Center x of the hex.
+     * @param centerY    Center y of the hex.
+     * @return Configured JavaFX Circle for the vertex.
+     */
+    private Circle createVertexCircle(Node node, int angleIndex, double centerX, double centerY) {
+        double angle_deg = CORNER_ANGLES_DEG[angleIndex];
+        double angle_rad = Math.toRadians(angle_deg);
+
+        double vx = centerX + HEX_SIZE * Math.cos(angle_rad);
+        double vy = centerY + HEX_SIZE * Math.sin(angle_rad);
+
+        Circle vertex = new Circle(8);
+        vertex.setFill(Color.LIGHTGRAY.deriveColor(1, 1, 1, 0.5));
+        vertex.setStroke(Color.GRAY);
+        vertex.setFill(Color.LIGHTGRAY);
+        vertex.setCenterX(vx);
+        vertex.setCenterY(vy);
+        vertex.setUserData(node);
+        vertex.setOpacity(0.5);
+        vertex.setOnMouseEntered(e -> vertex.setOpacity(0.8));
+        vertex.setOnMouseExited(e -> vertex.setOpacity(0.5));
+
+        vertex.setOnMouseClicked(event -> {
+            if (onVertexClickCallback != null) {
+                onVertexClickCallback.accept(vertex);
+            }
+        });
+
+        return vertex;
+    }
+
+    /**
+     * Creates a semi-transparent "ghost" {@link Circle} for interactive bandit placement
+     * at the center of the specified hex tile.
+     * The ghost circle responds to mouse events for hover highlighting and selection,
+     * and upon being clicked, triggers bandit placement logic on the associated tile.
+     *
+     * @param hex     the {@link Polygon} representing the hex tile on which to place the ghost
+     * @param centerX the x-coordinate of the center of the hex tile
+     * @return a configured {@link Circle} representing the interactive ghost marker
+     */
+    private Circle getGhostBanditCircle(Polygon hex, double centerX) {
+        double centerY = hex.getBoundsInParent().getMinY() + hex.getBoundsInParent().getHeight() / 2;
+
+        Circle ghost = new Circle(centerX, centerY, 20);
+        ghost.setStroke(Color.BLACK);
+        ghost.setFill(Color.DARKGREY);
+        ghost.setOpacity(0.3);
+
+        ghost.setOnMouseEntered(e -> ghost.setOpacity(1));
+        ghost.setOnMouseExited(e -> ghost.setOpacity(0.5));
+
+        ghost.setUserData(hex);
+
+        ghost.setOnMouseClicked(e -> {
+            Polygon targetHex = (Polygon) ghost.getUserData();
+            IntTupel targetCoord = tileByPolygon.get(targetHex);
+
+            if (onBanditPlaced != null) {
+                onBanditPlaced.accept(targetCoord);
+            }
+
+            placeBanditOnTile(centerX, centerY);
+            hideBanditGhosts();
+        });
+        return ghost;
+    }
+
 }

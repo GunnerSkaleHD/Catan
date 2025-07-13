@@ -3,7 +3,6 @@ package org.example.catan.gamepieces;
 /**
  * Represents the different types of resources available in the game
  * "The Settlers of Catan".
- *
  * These resources are used for building and trading. The {@code NONE} value
  * is used to represent the desert tile, which provides no resources.
  */
@@ -33,21 +32,13 @@ public enum Resources {
      */
     @Override
     public String toString() {
-        switch (this) {
-            case WOOD:
-                return "Wood";
-            case BRICK:
-                return "Brick";
-            case SHEEP:
-                return "Sheep";
-            case WHEAT:
-                return "Wheat";
-            case STONE:
-                return "Stone";
-            case NONE:
-                return "None (Desert)";
-            default:
-                return super.toString();
-        }
+        return switch (this) {
+            case WOOD -> "Wood";
+            case BRICK -> "Brick";
+            case SHEEP -> "Sheep";
+            case WHEAT -> "Wheat";
+            case STONE -> "Stone";
+            case NONE -> "None (Desert)";
+        };
     }
 }

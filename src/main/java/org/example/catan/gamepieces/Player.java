@@ -13,7 +13,6 @@ import java.util.Map;
 
 /**
  * Represents a player in the game "The Settlers of Catan".
- *
  * Tracks the player's color, inventory of resources, buildings placed, and allows actions such as
  * placing settlements and streets, collecting and spending resources, and computing victory points.
  */

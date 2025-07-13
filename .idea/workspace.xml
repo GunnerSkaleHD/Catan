@@ -4,9 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9ad4d4e4-26f7-440d-9ded-69545b1e7277" name="Changes" comment="Changed .gitignore">
+    <list default="true" id="9ad4d4e4-26f7-440d-9ded-69545b1e7277" name="Changes" comment="On the Verge of Perfection">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/catan/GameController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/catan/GameController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/catan/BoardView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/catan/BoardView.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/catan/gamepieces/Dice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/catan/gamepieces/Dice.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/catan/gamepieces/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/catan/gamepieces/Player.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/catan/gamepieces/Resources.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/catan/gamepieces/Resources.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/catan/gamepieces/TradeOffer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/catan/gamepieces/TradeOffer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/catan/gamepieces/buildings/BuildingPlacement.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/catan/gamepieces/buildings/BuildingPlacement.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/catan/gamepieces/buildings/Buildings.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/catan/gamepieces/buildings/Buildings.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -162,7 +168,7 @@
       <workItem from="1752352741891" duration="276000" />
       <workItem from="1752353023623" duration="195000" />
       <workItem from="1752373957289" duration="2031000" />
-      <workItem from="1752375999733" duration="933000" />
+      <workItem from="1752375999733" duration="2396000" />
     </task>
     <task id="LOCAL-00001" summary="Done">
       <option name="closed" value="true" />
@@ -348,7 +354,15 @@
       <option name="project" value="LOCAL" />
       <updated>1752376205300</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="On the Verge of Perfection">
+      <option name="closed" value="true" />
+      <created>1752377004108</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1752377004108</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -385,7 +399,8 @@
     <MESSAGE value="Changed README.md" />
     <MESSAGE value="Fixed Warnings in GameController" />
     <MESSAGE value="Changed .gitignore" />
-    <option name="LAST_COMMIT_MESSAGE" value="Changed .gitignore" />
+    <MESSAGE value="On the Verge of Perfection" />
+    <option name="LAST_COMMIT_MESSAGE" value="On the Verge of Perfection" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
