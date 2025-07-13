@@ -227,12 +227,10 @@ public class GameController {
      */
     private void nextPlayer() {
         if (currentPlayer.getVictoryPoints() >= 5) {
-            String winnerColor = colorToString(currentPlayer.getColor());
-
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("🎉 Victory!");
-            alert.setHeaderText("🏆 " + winnerColor + " wins the game!");
-            alert.setContentText("Congratulations to player " + winnerColor + " for reaching 5 victory points!");
+            alert.setHeaderText("🏆 " + currentPlayer.getName() + " wins the game!");
+            alert.setContentText("Congratulations to player " + currentPlayer.getName() + " for reaching 5 victory points!");
             alert.showAndWait();
 
         }
@@ -330,6 +328,7 @@ public class GameController {
             return;
         }
         if (!canBuildSettlement(currentPlayer) || !bank.useSettlement()) {
+            showAlert("Not enough resources to build settlement or no more settlements in the bank.");
             return;
         }
 
@@ -408,21 +407,6 @@ public class GameController {
 
         currentPlayerDiceRolls++;
         Platform.runLater(() -> boardView.updateResourceDisplay());
-    }
-
-    /**
-     * Converts a JavaFX Color object to a readable color name string.
-     *
-     * @param color the color to convert
-     * @return the string representation of the color
-     */
-    private String colorToString(Color color) {
-        if (Color.RED.equals(color)) return "Red";
-        if (Color.BLUE.equals(color)) return "Blue";
-        if (Color.YELLOW.equals(color)) return "Yellow";
-        if (Color.WHITE.equals(color)) return "White";
-        if (Color.ORANGE.equals(color)) return "Orange";
-        return "Unknown Color";
     }
 
     /**
