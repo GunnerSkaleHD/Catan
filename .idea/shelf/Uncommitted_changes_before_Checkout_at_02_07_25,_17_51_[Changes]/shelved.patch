@@ -1,0 +1,261 @@
+Index: src/main/java/org/example/catan/Graph/main.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package org.example.catan.Graph;\nimport org.example.catan.CatanBoard;\n\npublic class main {\n    public static void main(String[] args) {\n        CatanBoard board = new CatanBoard(3);\n        board.test(0, -2);\n    }\n}\n\n
+===================================================================
+diff --git a/src/main/java/org/example/catan/Graph/main.java b/src/main/java/org/example/catan/Graph/main.java
+--- a/src/main/java/org/example/catan/Graph/main.java	(revision 9ccb54201ebf1fdb8d84574bb45b151ce8af143b)
++++ b/src/main/java/org/example/catan/Graph/main.java	(date 1751469888882)
+@@ -4,7 +4,26 @@
+ public class main {
+     public static void main(String[] args) {
+         CatanBoard board = new CatanBoard(3);
+-        board.test(0, -2);
++        board.test( 0, -2);
++        board.test( 1, -2);
++        board.test( 2, -2);
++        board.test(-1, -1);
++        board.test( 0, -1);
++        board.test( 1, -1);
++        board.test( 2, -1);
++        board.test(-2,  0);
++        board.test(-1,  0);
++        board.test( 0,  0);
++        board.test( 1,  0);
++        board.test( 2,  0);
++        board.test(-2,  1);
++        board.test(-1,  1);
++        board.test( 0,  1);
++        board.test( 1,  1);
++        board.test(-2,  2);
++        board.test(-1,  2);
++        board.test( 0,  2);
++
+     }
+ }
+ 
+Index: src/main/java/org/example/catan/CatanBoard.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package org.example.catan;\n\nimport org.example.catan.Graph.*;\nimport org.example.catan.Resources;\n\n\nimport java.util.ArrayList;\nimport java.util.HashMap;\nimport java.util.Map;\nimport java.util.Random;\n\n\n\n//resourcen zuordnen - check\n//zahlen chips\n\n//trigger board funktion um erwürfeltes hexfeld auszuführen\n// map: würfelzahl -> arrayList<hexagon> shoutout an LL\n\n//alg für längste handelsstraße\n\n//methoden um zu bauen (siedlung, stadt, straße)\n\n//attribut für hexagons blocked - boolean - check\n\n\n\npublic class CatanBoard {\n    IntTupel[] hex_coords;\n    Map<IntTupel, HexTile> board = new HashMap<>();\n    static Node[] nodes;\n    int[][][] graph;\n\n    public void test(int x, int y) {\n        IntTupel key = new IntTupel(x, y);\n        HexTile tile = board.get(key);\n        System.out.println(tile);\n    }\n    private static final int STREET = 0;\n    private static final int PLAYER = 1;\n\n    /**\n     * Konstruktor: Initialisiert das CatanBoard mit dem gegebenen Radius.\n     * Ruft dabei die Methoden initNodes, initGraph, initHexCoords und createGraph auf.\n     *\n     * @param radius Radius des Spielfelds in Hex-Ringen\n     */\n    public CatanBoard(int radius) {\n        initNodes(radius);\n        initGraph();\n        initHexCoords(radius);\n        createGraph(radius);\n    }\n\n    /**\n     * Rekursive Berechnung der Gesamtzahl der benötigten Knoten (Nodes)\n     * für einen gegebenen Radius n.\n     *\n     * @param n Radius des Spielfelds (Anzahl der Hex-Ringe inklusive Zentrum)\n     * @return Gesamtzahl der Nodes für diesen Radius\n     */\n    private static int calcNumNodes(int n) {\n        if (n <= 0) {\n            return 0;\n        }\n        return calcNumNodes(n - 1) + (2 * n - 1) * 6;\n    }\n\n    /**\n     * Initialisiert das statische Node-Array mit der Anzahl aller Nodes für den\n     * angegebenen Radius. Jeder Node erhält eine eindeutige ID.\n     *\n     * @param n Radius des Spielfelds (Anzahl der Hex-Ringe inklusive Zentrum)\n     */\n    public static void initNodes(int n) {\n        int numNodes = calcNumNodes(n);\n        System.out.println(\"Anzahl Nodes: \" + numNodes);\n        nodes = new Node[numNodes];\n        for (int i = 0; i < numNodes; i++) {\n            nodes[i] = new Node(i);\n\n        }\n    }\n\n    /**\n     * Initialisiert den Straßen-Graphen ohne vorhandene Straßen.\n     * Setzt für jedes Paar (i,j):\n     *   graph[i][j][STREET]  = 0 (keine Straße)\n     *   graph[i][j][PLAYER]  = -1 (kein Besitzer)\n     */\n    private void initGraph() {\n        graph = new int[nodes.length][nodes.length][2];\n        for (int i = 0; i < nodes.length; i++) {\n            for (int j = 0; j < nodes.length; j++) {\n                graph[i][j][STREET] = 0;\n                graph[i][j][PLAYER] = -1;\n            }\n        }\n    }\n\n    /**\n     * Aktualisiert den Graphen, um das Vorhandensein einer Straße und die Spielerzugehörigkeit\n     * zwischen zwei Knoten (i und j) zu setzen oder zu entfernen. Die Operation wird in beide\n     * Richtungen durchgeführt, da der Graph ungerichtet ist.\n     *\n     * @param i        ID des ersten Knotens\n     * @param j        ID des zweiten Knotens\n     * @param existenz 1 = Straße vorhanden, 0 = keine Straße\n     * @param spieler  Index des Spielers, dem die Straße gehört, oder -1, wenn frei\n     */\n    public void updateGraph(int i, int j, int existenz, int spieler) {\n        graph[i][j][STREET] = existenz;\n        graph[i][j][PLAYER] = spieler;\n        graph[j][i][STREET] = existenz;\n        graph[j][i][PLAYER] = spieler;\n    }\n\n    /**\n     * Berechnet alle axialen Koordinaten (q,r) für HexTiles innerhalb des gegebenen Radius\n     * und füllt das Array hex_coords. Gültige Koordinaten erfüllen |q + r| < radius.\n     *\n     * @param radius Radius des Spielfelds in Hex-Ringen\n     */\n    private void initHexCoords(int radius) {\n        hex_coords = new IntTupel[calcNumHexTiles(radius)];\n        int index = 0;\n        for (int i = -radius + 1; i < radius; i++) {\n            for (int j = -radius + 1; j < radius; j++) {\n                if (Math.abs(i + j) < radius) {\n                    hex_coords[index] = new IntTupel(j, i);\n                    index++;\n                }\n            }\n        }\n    }\n\n    /**\n     * Rekursive Berechnung der Gesamtzahl der HexTiles für einen gegebenen Radius.\n     *\n     * @param n Radius des Spielfelds (Anzahl der Hex-Ringe)\n     * @return Anzahl aller HexTiles\n     */\n    private static int calcNumHexTiles(int n) {\n        if (n == 1) {\n            return 1;\n        }\n        return calcNumHexTiles(n - 1) + 6 * (n - 1);\n    }\n\n    /**\n     * Erzeugt alle HexTiles auf dem Spielfeld und verteilt dabei zufällig die Ressourcentypen.\n     * Verbindet außerdem die zugehörigen Knoten (Nodes) im Straßen-Graphen.\n     *\n     * Vorgehen:\n     * 1. Erzeuge eine Liste aller benötigten Ressourcen (ohne Wüste) und füge dann eine Wüste hinzu.\n     * 2. Für jede Koordinate in hex_coords:\n     *    a) Lege vorhandene Eckknoten anhand von Nachbar-HexTiles fest.\n     *    b) Weise allen noch leeren Eckknoten einen freien Node zu und verbinde benachbarte Knoten im Graphen.\n     *    c) Wähle zufällig eine Ressource aus und erstelle das HexTile.\n     *\n     * @param radius Radius des Spielfelds (wird nicht aktiv in dieser Methode verwendet)\n     */\n    private void createGraph(int radius) {\n        int index = 0;\n        Directions[] DIR = {\n                Directions.NORTH_WEST,\n                Directions.NORTH_EAST,\n                Directions.WEST\n        };\n\n        ArrayList<Resources> allResources = generateResourceTypes(hex_coords.length - 1);\n        allResources.add(Resources.NONE);\n        Random rand = new Random();\n        System.out.println(\"Alle Ressourcen: \" + allResources);\n\n        for (IntTupel coords : hex_coords) {\n            Node[] HexNodes = new Node[6];\n\n            for (Directions dir : DIR) {\n                IntTupel neighbor = new IntTupel(coords.q() + dir.getDq(), coords.r() + dir.getDr());\n                if (board.containsKey(neighbor)) {\n                    switch (dir) {\n                        case NORTH_WEST:\n                            HexNodes[5] = board.get(neighbor).getHexTileNodes()[3];\n                            HexNodes[0] = board.get(neighbor).getHexTileNodes()[2];\n                            break;\n                        case NORTH_EAST:\n                            HexNodes[0] = board.get(neighbor).getHexTileNodes()[4];\n                            HexNodes[1] = board.get(neighbor).getHexTileNodes()[3];\n                            break;\n                        case WEST:\n                            HexNodes[4] = board.get(neighbor).getHexTileNodes()[2];\n                            HexNodes[5] = board.get(neighbor).getHexTileNodes()[1];\n                            break;\n                    }\n                }\n            }\n\n            for (int i = 0; i < HexNodes.length; i++) {\n                if (HexNodes[i] == null) {\n                    HexNodes[i] = nodes[index];\n                    int nextIndex = (i + 1 + HexNodes.length) % HexNodes.length;\n                    if (HexNodes[nextIndex] != null) {\n                        updateGraph(index, HexNodes[nextIndex].id, 1, -1);\n                    }\n                    int prevIndex = (i - 1 + HexNodes.length) % HexNodes.length;\n                    if (HexNodes[prevIndex] != null) {\n                        updateGraph(index, HexNodes[prevIndex].id, 1, -1);\n                    }\n                    index++;\n                }\n            }\n\n            int randomIndex = rand.nextInt(allResources.size());\n            board.put(coords, new HexTile(0, allResources.get(randomIndex), HexNodes));\n            allResources.remove(randomIndex);\n        }\n\n        System.out.println(\"Graph created\");\n        System.out.println(\"Anzahl Knoten: \" + index);\n        for (IntTupel coords : hex_coords) {\n            System.out.println(\"Hexagon \" + coords.q() + \",\" + coords.r() + \": \" + board.get(coords).getAllHexTileNodes());\n        }\n        for (int i = 0; i < graph.length; i++) {\n            for (int j = 0; j < graph[i].length; j++) {\n                System.out.print(graph[i][j][STREET] + \", \");\n            }\n            System.out.println();\n        }\n    }\n\n    /**\n     * Generiert eine Liste aller benötigten Ressourcen (ohne Wüste) für numTiles HexTiles.\n     * Überspringt dabei den Wert Resources.NONE und sorgt für eine gleichmäßige Verteilung.\n     *\n     * @param numTiles Anzahl der HexTiles (ohne Wüste), die eine Ressource benötigen\n     * @return ArrayList mit Ressourcen-Typen\n     */\n    private static ArrayList<Resources> generateResourceTypes(int numTiles) {\n        ArrayList<Resources> allResources = new ArrayList<>();\n        Resources[] values = Resources.values();\n\n        for (int i = 0; i < numTiles; i++) {\n            if (values[i % values.length] != Resources.NONE) {\n                allResources.add(values[i % values.length]);\n            } else {\n                numTiles++;\n            }\n        }\n        return allResources;\n    }\n}\n
+===================================================================
+diff --git a/src/main/java/org/example/catan/CatanBoard.java b/src/main/java/org/example/catan/CatanBoard.java
+--- a/src/main/java/org/example/catan/CatanBoard.java	(revision 9ccb54201ebf1fdb8d84574bb45b151ce8af143b)
++++ b/src/main/java/org/example/catan/CatanBoard.java	(date 1751469996607)
+@@ -1,14 +1,11 @@
+ package org.example.catan;
+ 
+-import org.example.catan.Graph.*;
+-import org.example.catan.Resources;
+-
++import org.example.catan.Graph.Directions;
++import org.example.catan.Graph.HexTile;
++import org.example.catan.Graph.IntTupel;
++import org.example.catan.Graph.Node;
+ 
+-import java.util.ArrayList;
+-import java.util.HashMap;
+-import java.util.Map;
+-import java.util.Random;
+-
++import java.util.*;
+ 
+ 
+ //resourcen zuordnen - check
+@@ -24,21 +21,14 @@
+ //attribut für hexagons blocked - boolean - check
+ 
+ 
+-
+ public class CatanBoard {
++    private static final int STREET = 0;
++    private static final int PLAYER = 1;
++    static Node[] nodes;
+     IntTupel[] hex_coords;
+     Map<IntTupel, HexTile> board = new HashMap<>();
+-    static Node[] nodes;
+     int[][][] graph;
+ 
+-    public void test(int x, int y) {
+-        IntTupel key = new IntTupel(x, y);
+-        HexTile tile = board.get(key);
+-        System.out.println(tile);
+-    }
+-    private static final int STREET = 0;
+-    private static final int PLAYER = 1;
+-
+     /**
+      * Konstruktor: Initialisiert das CatanBoard mit dem gegebenen Radius.
+      * Ruft dabei die Methoden initNodes, initGraph, initHexCoords und createGraph auf.
+@@ -82,11 +72,61 @@
+         }
+     }
+ 
++    /**
++     * Rekursive Berechnung der Gesamtzahl der HexTiles für einen gegebenen Radius.
++     *
++     * @param n Radius des Spielfelds (Anzahl der Hex-Ringe)
++     * @return Anzahl aller HexTiles
++     */
++    private static int calcNumHexTiles(int n) {
++        if (n == 1) {
++            return 1;
++        }
++        return calcNumHexTiles(n - 1) + 6 * (n - 1);
++    }
++
++    /**
++     * Generiert eine Liste aller benötigten Ressourcen (ohne Wüste) für numTiles HexTiles.
++     * Überspringt dabei den Wert Resources.NONE und sorgt für eine gleichmäßige Verteilung.
++     *
++     * @param numTiles Anzahl der HexTiles (ohne Wüste), die eine Ressource benötigen
++     * @return ArrayList mit Ressourcen-Typen
++     */
++    private static ArrayList<Resources> generateResourceTypes(int numTiles) {
++        ArrayList<Resources> allResources = new ArrayList<>();
++        Resources[] values = Resources.values();
++
++        for (int i = 0; i < numTiles; i++) {
++            if (values[i % values.length] != Resources.NONE) {
++                allResources.add(values[i % values.length]);
++            } else {
++                numTiles++;
++            }
++        }
++        return allResources;
++    }
++
++    private static ArrayList<Integer> generateDiceNumbers() {
++        ArrayList<Integer> diceNumbers = new ArrayList<>(Arrays.asList(
++                2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12
++        ));
++
++        Collections.shuffle(diceNumbers);
++
++        return diceNumbers;
++    }
++
++    public void test(int x, int y) {
++        IntTupel key = new IntTupel(x, y);
++        HexTile tile = board.get(key);
++        System.out.println(tile);
++    }
++
+     /**
+      * Initialisiert den Straßen-Graphen ohne vorhandene Straßen.
+      * Setzt für jedes Paar (i,j):
+-     *   graph[i][j][STREET]  = 0 (keine Straße)
+-     *   graph[i][j][PLAYER]  = -1 (kein Besitzer)
++     * graph[i][j][STREET]  = 0 (keine Straße)
++     * graph[i][j][PLAYER]  = -1 (kein Besitzer)
+      */
+     private void initGraph() {
+         graph = new int[nodes.length][nodes.length][2];
+@@ -134,29 +174,16 @@
+         }
+     }
+ 
+-    /**
+-     * Rekursive Berechnung der Gesamtzahl der HexTiles für einen gegebenen Radius.
+-     *
+-     * @param n Radius des Spielfelds (Anzahl der Hex-Ringe)
+-     * @return Anzahl aller HexTiles
+-     */
+-    private static int calcNumHexTiles(int n) {
+-        if (n == 1) {
+-            return 1;
+-        }
+-        return calcNumHexTiles(n - 1) + 6 * (n - 1);
+-    }
+-
+     /**
+      * Erzeugt alle HexTiles auf dem Spielfeld und verteilt dabei zufällig die Ressourcentypen.
+      * Verbindet außerdem die zugehörigen Knoten (Nodes) im Straßen-Graphen.
+-     *
++     * <p>
+      * Vorgehen:
+      * 1. Erzeuge eine Liste aller benötigten Ressourcen (ohne Wüste) und füge dann eine Wüste hinzu.
+      * 2. Für jede Koordinate in hex_coords:
+-     *    a) Lege vorhandene Eckknoten anhand von Nachbar-HexTiles fest.
+-     *    b) Weise allen noch leeren Eckknoten einen freien Node zu und verbinde benachbarte Knoten im Graphen.
+-     *    c) Wähle zufällig eine Ressource aus und erstelle das HexTile.
++     * a) Lege vorhandene Eckknoten anhand von Nachbar-HexTiles fest.
++     * b) Weise allen noch leeren Eckknoten einen freien Node zu und verbinde benachbarte Knoten im Graphen.
++     * c) Wähle zufällig eine Ressource aus und erstelle das HexTile.
+      *
+      * @param radius Radius des Spielfelds (wird nicht aktiv in dieser Methode verwendet)
+      */
+@@ -169,9 +196,10 @@
+         };
+ 
+         ArrayList<Resources> allResources = generateResourceTypes(hex_coords.length - 1);
++        ArrayList<Integer> allDiceNumbers = generateDiceNumbers();
+         allResources.add(Resources.NONE);
+         Random rand = new Random();
+-        System.out.println("Alle Ressourcen: " + allResources);
++//        System.out.println("Alle Ressourcen: " + allResources);
+ 
+         for (IntTupel coords : hex_coords) {
+             Node[] HexNodes = new Node[6];
+@@ -212,41 +240,34 @@
+             }
+ 
+             int randomIndex = rand.nextInt(allResources.size());
+-            board.put(coords, new HexTile(0, allResources.get(randomIndex), HexNodes));
++            Resources selectedResource = allResources.get(randomIndex);
++            int diceNumber;
++
++            if (selectedResource.equals(Resources.NONE)) {
++                diceNumber = 0; // desert, no dice number
++            } else {
++                diceNumber = allDiceNumbers.remove(0);
++            }
++
++            board.put(coords, new HexTile(diceNumber, selectedResource, HexNodes));
+             allResources.remove(randomIndex);
++
++//            board.put(coords, new HexTile(diceNumber, allResources.get(randomIndex), HexNodes));
++////            allDiceNumbers.remove(randomIndex);
++//            allResources.remove(randomIndex);
+         }
+ 
+-        System.out.println("Graph created");
+-        System.out.println("Anzahl Knoten: " + index);
++//        System.out.println("Graph created");
++//        System.out.println("Anzahl Knoten: " + index);
+         for (IntTupel coords : hex_coords) {
+-            System.out.println("Hexagon " + coords.q() + "," + coords.r() + ": " + board.get(coords).getAllHexTileNodes());
++//            System.out.println("Hexagon " + coords.q() + "," + coords.r() + ": " + board.get(coords)
++//            .getAllHexTileNodes());
+         }
+         for (int i = 0; i < graph.length; i++) {
+             for (int j = 0; j < graph[i].length; j++) {
+-                System.out.print(graph[i][j][STREET] + ", ");
++//                System.out.print(graph[i][j][STREET] + ", ");
+             }
+-            System.out.println();
++//            System.out.println();
+         }
+     }
+-
+-    /**
+-     * Generiert eine Liste aller benötigten Ressourcen (ohne Wüste) für numTiles HexTiles.
+-     * Überspringt dabei den Wert Resources.NONE und sorgt für eine gleichmäßige Verteilung.
+-     *
+-     * @param numTiles Anzahl der HexTiles (ohne Wüste), die eine Ressource benötigen
+-     * @return ArrayList mit Ressourcen-Typen
+-     */
+-    private static ArrayList<Resources> generateResourceTypes(int numTiles) {
+-        ArrayList<Resources> allResources = new ArrayList<>();
+-        Resources[] values = Resources.values();
+-
+-        for (int i = 0; i < numTiles; i++) {
+-            if (values[i % values.length] != Resources.NONE) {
+-                allResources.add(values[i % values.length]);
+-            } else {
+-                numTiles++;
+-            }
+-        }
+-        return allResources;
+-    }
+ }

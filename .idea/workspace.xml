@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="9ad4d4e4-26f7-440d-9ded-69545b1e7277" name="Changes" comment="Changed .gitignore">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Enum" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="Lucius" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;GunnerSkaleHD&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/GunnerSkaleHD/Catan.git&quot;,
+    &quot;accountId&quot;: &quot;5a42f4d3-0e3d-4c8f-bddb-a8393a87eaca&quot;
+  }
+}</component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
+  <component name="ProjectId" id="2wRxFtV1wPDrsbZVw3n0MMGXtLE" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.CatanApplication.executor": "Run",
+    "Application.HelloApplication.executor": "Run",
+    "Application.Main.executor": "Run",
+    "Application.main.executor": "Run",
+    "JAR Application.catan-1.0-SNAPSHOT.jar.executor": "Run",
+    "JAR Application.original-catan-1.0-SNAPSHOT.jar.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/lucius.lechner/Documents/GitHub/catan",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.0",
+    "settings.editor.selected.configurable": "preferences.keymap",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/main/java/org/example/catan" />
+    </key>
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="org.example.catan" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="JetRunConfigurationType">
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <option name="filePath" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-125ca727e0f0-intellij.indexing.shared.core-IU-243.24978.46" />
+        <option value="bundled-js-predefined-d6986cc7102b-76f8388c3a79-JavaScript-IU-243.24978.46" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="9ad4d4e4-26f7-440d-9ded-69545b1e7277" name="Changes" comment="" />
+      <created>1746018086787</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1746018086787</updated>
+      <workItem from="1746018087873" duration="96000" />
+      <workItem from="1746110144351" duration="8000" />
+      <workItem from="1746512314636" duration="1530000" />
+      <workItem from="1746608790835" duration="11000" />
+      <workItem from="1747223665141" duration="7166000" />
+      <workItem from="1747230910293" duration="394000" />
+      <workItem from="1747232305995" duration="1141000" />
+      <workItem from="1747288963776" duration="5000" />
+      <workItem from="1747303816287" duration="5000" />
+      <workItem from="1747750091496" duration="286000" />
+      <workItem from="1747918570088" duration="6028000" />
+      <workItem from="1747926863227" duration="319000" />
+      <workItem from="1747927507782" duration="1659000" />
+      <workItem from="1748097479198" duration="134000" />
+      <workItem from="1748184075441" duration="5480000" />
+      <workItem from="1748246540772" duration="4000" />
+      <workItem from="1748263215273" duration="2029000" />
+      <workItem from="1748439386573" duration="46000" />
+      <workItem from="1748443047942" duration="1680000" />
+      <workItem from="1748784206545" duration="2000" />
+      <workItem from="1749127077803" duration="1262000" />
+      <workItem from="1749129454571" duration="3370000" />
+      <workItem from="1749157309333" duration="18000" />
+      <workItem from="1749752996849" duration="1570000" />
+      <workItem from="1749802137083" duration="1060000" />
+      <workItem from="1750428509309" duration="574000" />
+      <workItem from="1751279408196" duration="166000" />
+      <workItem from="1751411428956" duration="4353000" />
+      <workItem from="1751468479690" duration="2949000" />
+      <workItem from="1751471561821" duration="1956000" />
+      <workItem from="1751579660765" duration="881000" />
+      <workItem from="1751628028803" duration="549000" />
+      <workItem from="1751628585685" duration="826000" />
+      <workItem from="1751629419930" duration="7482000" />
+      <workItem from="1751800369168" duration="18413000" />
+      <workItem from="1751830728358" duration="1000" />
+      <workItem from="1751830794676" duration="119000" />
+      <workItem from="1752330984433" duration="18674000" />
+      <workItem from="1752352625407" duration="48000" />
+      <workItem from="1752352741891" duration="276000" />
+      <workItem from="1752353023623" duration="195000" />
+      <workItem from="1752373957289" duration="2031000" />
+      <workItem from="1752375999733" duration="102000" />
+    </task>
+    <task id="LOCAL-00001" summary="Done">
+      <option name="closed" value="true" />
+      <created>1748444074576</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1748444074576</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Lucius Branch push">
+      <option name="closed" value="true" />
+      <created>1749130348720</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1749130348720</updated>
+    </task>
+    <task id="LOCAL-00003" summary="CatanBoard test runs possible">
+      <option name="closed" value="true" />
+      <created>1751411503601</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1751411503601</updated>
+    </task>
+    <task id="LOCAL-00004" summary="CatanBoard DiceNumbers added">
+      <option name="closed" value="true" />
+      <created>1751472064557</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1751472064557</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Not working">
+      <option name="closed" value="true" />
+      <created>1751628215147</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1751628215147</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Not working">
+      <option name="closed" value="true" />
+      <created>1751629399044</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1751629399044</updated>
+    </task>
+    <task id="LOCAL-00007" summary="CatanBoard and Julians Code are working together. Gute Besserung Julian">
+      <option name="closed" value="true" />
+      <created>1751637204205</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1751637204205</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Circles moved on top of hextiles and Node-Id is printed when Node is pressed/Settlement is built">
+      <option name="closed" value="true" />
+      <created>1751637747160</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1751637747160</updated>
+    </task>
+    <task id="LOCAL-00009" summary="better">
+      <option name="closed" value="true" />
+      <created>1751638023752</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1751638023752</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Game funktioniert zu 50%">
+      <option name="closed" value="true" />
+      <created>1751825722383</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1751825722383</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Game funktioniert zu 85%">
+      <option name="closed" value="true" />
+      <created>1751829012933</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1751829012933</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Game funktioniert zu 86%">
+      <option name="closed" value="true" />
+      <created>1751829097326</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1751829097326</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Game funktioniert zu 87%">
+      <option name="closed" value="true" />
+      <created>1751830638259</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1751830638259</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Changed README.md">
+      <option name="closed" value="true" />
+      <created>1751830831430</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1751830831430</updated>
+    </task>
+    <task id="LOCAL-00015" summary="Game funktioniert zu 95%">
+      <option name="closed" value="true" />
+      <created>1752345654201</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1752345654201</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Game funktioniert zu 100%">
+      <option name="closed" value="true" />
+      <created>1752352223807</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1752352223807</updated>
+    </task>
+    <task id="LOCAL-00017" summary="Game funktioniert zu 100% auf origin/main">
+      <option name="closed" value="true" />
+      <created>1752353147113</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1752353147113</updated>
+    </task>
+    <task id="LOCAL-00018" summary="Added Method that random resource from random player is stolen when 7 is rolled">
+      <option name="closed" value="true" />
+      <created>1752374976311</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1752374976311</updated>
+    </task>
+    <task id="LOCAL-00019" summary="Changed README.md">
+      <option name="closed" value="true" />
+      <created>1752375622787</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1752375622787</updated>
+    </task>
+    <task id="LOCAL-00020" summary="Fixed Warnings in GameController">
+      <option name="closed" value="true" />
+      <created>1752375808977</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1752375808977</updated>
+    </task>
+    <task id="LOCAL-00021" summary="Changed .gitignore">
+      <option name="closed" value="true" />
+      <created>1752375944707</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1752375944707</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Done" />
+    <MESSAGE value="Lucius Branch push" />
+    <MESSAGE value="CatanBoard test runs possible" />
+    <MESSAGE value="CatanBoard DiceNumbers added" />
+    <MESSAGE value="Not working" />
+    <MESSAGE value="CatanBoard and Julians Code are working together. Gute Besserung Julian" />
+    <MESSAGE value="Circles moved on top of hextiles and Node-Id is printed when Node is pressed/Settlement is built" />
+    <MESSAGE value="better" />
+    <MESSAGE value="Game funktioniert zu 50%" />
+    <MESSAGE value="Game funktioniert zu 85%" />
+    <MESSAGE value="Game funktioniert zu 86%" />
+    <MESSAGE value="Game funktioniert zu 87%" />
+    <MESSAGE value="Game funktioniert zu 95%" />
+    <MESSAGE value="Game funktioniert zu 100%" />
+    <MESSAGE value="Game funktioniert zu 100% auf origin/main" />
+    <MESSAGE value="Added Method that random resource from random player is stolen when 7 is rolled" />
+    <MESSAGE value="Changed README.md" />
+    <MESSAGE value="Fixed Warnings in GameController" />
+    <MESSAGE value="Changed .gitignore" />
+    <option name="LAST_COMMIT_MESSAGE" value="Changed .gitignore" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
