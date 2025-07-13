@@ -34,7 +34,6 @@ public class GameController {
     private int currentPlayerDiceRolls;
     private Bank bank;
     private boolean waitingForBandit = false;
-    private int lastRolledNumber = -1;
 
 
     /**
@@ -187,7 +186,6 @@ public class GameController {
 
         int result = new Dice(2).rollDice();
 
-        lastRolledNumber = result;
         Platform.runLater(() -> boardView.updateDiceNumber(result));
 
 
@@ -467,7 +465,6 @@ public class GameController {
 
     /**
      * Steals a random resource from a random other player.
-     *
      * This method selects a random player from the provided player list (excluding the current player),
      * who has at least one resource card. It then steals a random resource type (that the victim actually owns)
      * and transfers one card of that type from the victim to the current player. If no eligible victims exist,
